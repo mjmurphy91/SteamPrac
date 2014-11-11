@@ -1,19 +1,33 @@
 Steam-lite
 
-Steam is an entertainment platform developed by the company Valve and is one of the largest digital game libraries in the gaming industry. It allows PC, Mac, and Linux gamers access to thousands of industry and indie games to play, and to connect and play with millions of other gamers.
+Steam is an entertainment platform developed by the company Valve and is one of the largest 
+digital game libraries in the gaming industry. It allows PC, Mac, and Linux gamers access to 
+thousands of industry and indie games to play, and to connect and play with millions of 
+other gamers.
 
-My idea for creating Steam-lite is to use a model similar to our Twitter projects where backend data servers hold all the information while front end servers handle traffic. There will also be a more robust client that users will use to interact with the front end servers and play their games.
+My idea for creating Steam-lite is to use a model similar to our Twitter projects where 
+backend data servers hold all the information while front end servers handle traffic. There 
+will also be a more robust client that users will use to interact with the front end servers 
+and play their games.
 
 Potential Features:
 1. User Accounts and Authentication
+	- Users should be able to log in from different machines, but not two at once, and
+	access their games and data for their games.
 2. Game Purchase
+	- Users need to be able to purchase games to add to their local libraries.
 3. Game Download
+	- Purchased games must be downloaded to play.
 4. Local Game Play (with or without connecting to servers)
+	- Dowloaded games should be playable from client.
 5. Leaderboards for each game
 6. Achievements for each game
 7. Multiplayer over Servers
+	- Some games should be able to allow players on different machines to play against each other, and potentiall pause games to pick them up again later.
 8. Local Game Data Synch w/ Server Data
+	- Basic cloud storage type of guarantee
 9. Local Game Data Deletion w/ Server Data Storage Persistance
+	- Game data saved to the server should be retrievable
 10. User submission of games to Game Library
 11. "Friend" other users
 12. Messaging between users
