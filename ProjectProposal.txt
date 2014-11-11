@@ -1,0 +1,22 @@
+Steam-lite
+
+Steam is an entertainment platform developed by the company Valve and is one of the largest digital game libraries in the gaming industry. It allows PC, Mac, and Linux gamers access to thousands of industry and indie games to play, and to connect and play with millions of other gamers.
+
+My idea for creating Steam-lite is to use a model similar to our Twitter projects where backend data servers hold all the information while front end servers handle traffic. There will also be a more robust client that users will use to interact with the front end servers and play their games.
+
+Potential Features:
+1. User Accounts and Authentication
+2. Game Purchase
+3. Game Download
+4. Local Game Play (with or without connecting to servers)
+5. Leaderboards for each game
+6. Achievements for each game
+7. Multiplayer over Servers
+8. Local Game Data Synch w/ Server Data
+9. Local Game Data Deletion w/ Server Data Storage Persistance
+10. User submission of games to Game Library
+11. "Friend" other users
+12. Messaging between users
+13. User Money/Credit for game purchases
+14. Users gifting games to other users
+15. Recommendation system
