@@ -10,27 +10,88 @@ backend data servers hold all the information while front end servers handle tra
 will also be a more robust client that users will use to interact with the front end servers 
 and play their games.
 
-Potential Features:
+
+Architecture:
+	Client:
+		Responsible for interacting with users, running games, and communicating with Backend servers.
+
+	Backend:
+		Holds user data and game data
+		User -->	| Password
+					| Signed in on
+					| Games[]
+					| GamesInProgress[]
+
+		Game -->	| FileLocation
+
+	Client handles most user interaction, interacting with Backend for purposes of all but local game play, including: signing in, purchasing, downloading games, multiplayer.
+
+
+API:
+	Sign In:
+	Sign Out:
+	Purchase Game:
+	Download Game:
+	Make Move:
+	Get Move:
+
+
+Game API:
+	getRules:
+	getBoard:
+	updateBoard:
+	makeMove:
+	Victory:
+
+
+Core Features:
 1. User Accounts and Authentication
 	- Users should be able to log in from different machines, but not two at once, and
-	access their games and data for their games.
+	access their games.
+
 2. Game Purchase
 	- Users need to be able to purchase games to add to their local libraries.
+
 3. Game Download
 	- Purchased games must be downloaded to play.
+
 4. Local Game Play (with or without connecting to servers)
 	- Dowloaded games should be playable from client.
-5. Leaderboards for each game
-6. Achievements for each game
-7. Multiplayer over Servers
+
+5. Multiplayer over Servers
 	- Some games should be able to allow players on different machines to play against each other, and potentiall pause games to pick them up again later.
-8. Local Game Data Synch w/ Server Data
+
+
+Other Potential Features:
+1. Leaderboards for each game
+	Backend --> Game | Leaderboard[]
+	API:
+		Post Score:
+
+2. Achievements for each game
+	Client --> User | Game | Achievements 	| Locked[]
+											| Unlocked[]
+	Backend --> Game | Achievements[]
+	Backend --> User | Game | Achievements	| Locked[]
+											| Unlocked[]
+	API:
+		Unlock Achievement:
+
+
+3. Local Game Data Synch w/ Server Data
 	- Basic cloud storage type of guarantee
-9. Local Game Data Deletion w/ Server Data Storage Persistance
+
+4. Local Game Data Deletion w/ Server Data Storage Persistance
 	- Game data saved to the server should be retrievable
-10. User submission of games to Game Library
-11. "Friend" other users
-12. Messaging between users
-13. User Money/Credit for game purchases
-14. Users gifting games to other users
-15. Recommendation system
+
+5. User submission of games to Game Library
+
+6. "Friend" other users
+
+7. Messaging between users
+
+8. User Money/Credit for game purchases
+
+9. Users gifting games to other users
+
+10. Recommendation system
