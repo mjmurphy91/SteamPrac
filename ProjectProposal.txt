@@ -26,6 +26,8 @@ Architecture:
 
 	Client handles most user interaction, interacting with Backend for purposes of all but local game play, including: signing in, purchasing, downloading games, multiplayer.
 
+	Data Consistency: Strong (Bully Algorithm)
+
 
 API:
 	Sign In:
