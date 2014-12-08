@@ -1,9 +1,10 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.lang.reflect.Constructor;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
@@ -13,7 +14,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Scanner;
 
 import org.apache.logging.log4j.LogManager;
@@ -55,12 +55,13 @@ public class SteamLite {
 					steamSock.getInputStream()));
 
 			line = in.readLine();
+			rootLogger.trace("Received line: " + line);
 			int bufferSize = Integer.parseInt(line.split(" ")[1]);
 			rootLogger.trace("Buffer Size: " + bufferSize);
-			line = in.readLine();
 			char[] bytes = new char[bufferSize];
 			in.read(bytes, 0, bufferSize);
 			lineText = new String(bytes);
+			rootLogger.trace("LineText: " + lineText);
 						
 			out.flush();
 			out.close();
@@ -76,6 +77,8 @@ public class SteamLite {
 		try {
 			return (JSONObject) parser.parse(lineText);
 		} catch (ParseException e) {
+			e.printStackTrace();
+			rootLogger.trace("ParseException: " + e);
 			return null;
 		}
 	}
@@ -83,9 +86,9 @@ public class SteamLite {
 	/**
 	 * Gets the SteamServer SteamLite will connect to
 	 */
-	//TODO
 	@SuppressWarnings("unchecked")
 	private static boolean fillLibrary() {
+		rootLogger.trace("fillLibrary Called");
 		JSONObject obj = new JSONObject();
 		obj.put("request", "library");
 		obj.put("username", username);
@@ -97,10 +100,12 @@ public class SteamLite {
 						&& !obj.get("library").equals("failed"))) {
 			System.out.println("Sorry, a problem has occurred with the "
 					+ "server");
+			rootLogger.trace("Key missing");
 			return false;
 		}
-		else if(obj.get("buy").equals("failed")) {
+		else if(obj.get("library").equals("failed")) {
 			System.out.println(obj.get("exception"));
+			rootLogger.trace("Library failed");
 			return false;
 		}
 		
@@ -110,23 +115,64 @@ public class SteamLite {
 		File[] files = cur.listFiles();
 		
 		for(String game : myLibrary) {
-			for(File file: files) {
-				System.out.println(file.getName().replace(".java", ""));
-				String fileCheck = file.getName().replace(".java", "");
-				if(game.replaceAll(" ", "").equals(fileCheck)) {
-//					Class<?> clazz = Class.forName(fileCheck);
-//					Constructor<?> constructor = clazz.getConstructor(String.class, Integer.class);
-//					Object instance = constructor.newInstance("stringparam", 42);
-					if(fileCheck.equals("TickTackToe")) {
-						gamesLibrary.put(fileCheck, new TickTackToe());
-					}
-					else if(fileCheck.equals("CoinFlip")) {
-						gamesLibrary.put(fileCheck, new CoinFlip());
+			if(!gamesLibrary.containsKey(game.replaceAll(" ", ""))) {
+				for(File file: files) {
+					String fileCheck = file.getName().replace(".java", "");
+					if(game.replaceAll(" ", "").equals(fileCheck)) {
+//						Class<?> clazz = Class.forName(fileCheck);
+//						Constructor<?> constructor = clazz.getConstructor(String.class, Integer.class);
+//						Object instance = constructor.newInstance("stringparam", 42);
+						if(fileCheck.equals("TickTackToe")) {
+							gamesLibrary.put(fileCheck, new TickTackToe());
+						}
+						else if(fileCheck.equals("CoinFlip")) {
+							gamesLibrary.put(fileCheck, new CoinFlip());
+						}
 					}
 				}
 			}
 		}
 		return true;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private static boolean downloadGame(String game) {
+		JSONObject obj = new JSONObject();
+		obj.put("request", "download");
+		obj.put("username", username);
+		obj.put("password", password);
+		obj.put("game", game);
+		
+		obj = serverRequest(obj);
+		if(!obj.containsKey("download") || !obj.containsKey("game") 
+				|| obj.containsKey("title") 
+				|| (!obj.get("download").equals("success")
+				&& !obj.get("download").equals("failed"))) {
+			System.out.println("Sorry, a problem has occurred with the "
+					+ "server");
+			return false;
+		}
+		else if(obj.get("download").equals("failed")) {
+			System.out.println(obj.get("exception"));
+			return false;
+		}
+		
+		try { 
+			File file = new File("/src/" + obj.get("title"));
+ 
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+ 
+			FileWriter fw = new FileWriter(file.getAbsoluteFile());
+			BufferedWriter bw = new BufferedWriter(fw);
+			bw.write((String) obj.get("game"));
+			bw.close(); 
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return fillLibrary();
 	}
 	
 	private static void printCommands() {
@@ -135,8 +181,7 @@ public class SteamLite {
 	}
 	
 	private static void printGameCommands() {
-		System.out.println("Make move: (m)\nDisplay Rules: (r)\nDraw Board: (d)"
-				+ "\nPrint Commands Again: (p)");
+		System.out.println("Make move: (m)\nDisplay Rules: (r)\nDraw Board: (d)");
 	}
 	
 	/**
@@ -144,11 +189,17 @@ public class SteamLite {
 	 */
 	//TODO
 	private static void playGame(int choice) {
-		Game game = gamesLibrary.get(myLibrary.get(choice));
+		if(!gamesLibrary.containsKey(myLibrary.get(choice).replaceAll(" ", ""))) {
+			System.out.println("Game is now downloading");
+			downloadGame(myLibrary.get(choice));
+			System.out.println("Game download complete");
+		}
+		Game game = gamesLibrary.get(myLibrary.get(choice).replaceAll(" ", ""));
 		String input;
 		printGameCommands();
 		
 		while(!game.isVictory()) {
+			System.out.println("Print Commands Again: (p)");
 			if(game.isMultiplayer()) {
 				//get update
 			}
@@ -156,7 +207,7 @@ public class SteamLite {
 			input = scan.next();
 			
 			if(input.equals("d")) {
-				game.drawBoard();
+				System.out.println(game.drawBoard());
 			}
 			else if(input.equals("m")) {
 				if(game.isMyTurn()) {
@@ -167,6 +218,12 @@ public class SteamLite {
 						if(game.isMultiplayer()) {
 							//send update
 						}
+						if(!game.isVictory()) {
+							System.out.println("Victory has not yet been attained");
+						}
+						else {
+							break;
+						}
 					}
 				} 
 				else {
@@ -174,7 +231,7 @@ public class SteamLite {
 				}
 			}
 			else if(input.equals("r")) {
-				game.getRules();
+				System.out.println(game.getRules());
 			}
 			else if(input.equals("p")) {
 				printGameCommands();
@@ -239,7 +296,7 @@ public class SteamLite {
 						+ "server");
 				return false;
 			}
-			else if(obj.get("login").equals("failed")) {
+			else if(obj.get("register").equals("failed")) {
 				System.out.println(obj.get("exception"));
 				return false;
 			}
@@ -268,7 +325,7 @@ public class SteamLite {
 					+ "server");
 			return false;
 		}
-		else if(obj.get("login").equals("failed")) {
+		else if(obj.get("logout").equals("failed")) {
 			System.out.println(obj.get("exception"));
 			return false;
 		}
@@ -317,13 +374,13 @@ public class SteamLite {
 		obj.put("request", "buy");
 		obj.put("username", username);
 		obj.put("password", password);
-		System.out.println("Please enter index of game to purchase:\n Enter (l)"
+		System.out.println("Please enter index of game to purchase:\n Enter (s)"
 				+ " to display store");
 		//Send Request
-		String input = "l";
-		while(input.equals("l")) {
+		String input = "s";
+		while(input.equals("s")) {
 			input = scan.next();
-			if(input.equals("l")) {
+			if(input.equals("s")) {
 				displayStore();
 			}
 			else {
@@ -435,11 +492,14 @@ public class SteamLite {
 		scan = new Scanner(System.in);
 		parser = new JSONParser();
 		
-		if(!getDiscServer(args[1])) {
+		if(!getDiscServer(args[0])) {
 			System.exit(0);
 		}
 		
 		//while(!getInitialServer());
+		steamServer = new String[2];
+		steamServer[0] = "192.168.1.4";
+		steamServer[1] = "2345";
 		
 		while(!login());
 		
@@ -474,6 +534,16 @@ public class SteamLite {
 			}
 			else if(input.equals("p")) {
 				System.out.println("Choose Game to Play:");
+				for(int i = 0; i < myLibrary.size(); i++) {
+					if(gamesLibrary.containsKey(myLibrary.get(i).replaceAll(" ", ""))) {
+						System.out.println(i + ") " + myLibrary.get(i));
+					}
+					else {
+						System.out.println(i + ") " + myLibrary.get(i) 
+								+ " (Not Downloaded)");
+					}
+				}
+				
 				input = scan.next();
 				
 				try {

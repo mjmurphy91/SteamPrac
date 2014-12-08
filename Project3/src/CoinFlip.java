@@ -52,14 +52,14 @@ public class CoinFlip implements Game{
 	public boolean isVictory() {
 		if(lastMove.equals("H") && isHeads) {
 			System.out.println("Correct!");
+			lastMove = "";
 			return true;
 		}
 		else if (lastMove.equals("T") && !isHeads) {
 			System.out.println("Correct!");
+			lastMove = "";
 			return true;
-		}
-		
-		System.out.println("Nope! Try again!");
+		}		
 		return false;
 	}
 	

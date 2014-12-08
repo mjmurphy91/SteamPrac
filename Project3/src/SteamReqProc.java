@@ -102,8 +102,8 @@ public class SteamReqProc implements Runnable {
 					//User Library
 					else if(obj.get("request").equals("library")) {
 						JSONObject excObj = new JSONObject();
-						excObj.put("store", "success");
-						JSONArray games = (JSONArray) ds.getUserGames((String) obj.get("username"));
+						excObj.put("library", "success");
+						JSONArray games = ds.getUserGames((String) obj.get("username"));
 						excObj.put("games", games);
 						rootLogger.trace("Request for user Library complete");
 						sendJSON(excObj);
@@ -112,7 +112,7 @@ public class SteamReqProc implements Runnable {
 					else if (obj.get("request").equals("store")) {
 						JSONObject excObj = new JSONObject();
 						excObj.put("store", "success");
-						JSONArray games = (JSONArray) ds.getStoreGames((String) obj.get("username"));
+						JSONArray games = ds.getStoreGames((String) obj.get("username"));
 						excObj.put("games", games);
 						rootLogger.trace("Request for Store Games complete");
 						sendJSON(excObj);
@@ -151,8 +151,9 @@ public class SteamReqProc implements Runnable {
 							Path path = FileSystems.getDefault().getPath(".", file);
 							String game = Files.readAllLines(path, Charset.defaultCharset()).get(0);
 							JSONObject excObj = new JSONObject();
-							excObj.put("buy", "success");
+							excObj.put("download", "success");
 							excObj.put("game", game);
+							excObj.put("title", file);
 							rootLogger.trace("Game successfuly purchased");
 							sendJSON(excObj);
 						}

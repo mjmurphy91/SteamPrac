@@ -1,6 +1,8 @@
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.json.simple.JSONArray;
+
 
 public class UserData {
 
@@ -59,8 +61,9 @@ public class UserData {
 		return true;
 	}
 	
-	public ArrayList<String> getGames() {
-		ArrayList<String> gamesList = new ArrayList<String>();
+	@SuppressWarnings("unchecked")
+	public JSONArray getGames() {
+		JSONArray gamesList = new JSONArray();
 		gamesList.addAll(gamesOwned);		
 		return gamesList;
 	}

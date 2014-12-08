@@ -1,12 +1,10 @@
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 
 @SuppressWarnings("serial")
 public class DataStore implements java.io.Serializable {
@@ -74,10 +72,11 @@ public class DataStore implements java.io.Serializable {
 		storeGames.addAll(gameFiles.keySet());
 		try {
 			String game = storeGames.get(Integer.parseInt(gameIndex));
-			if (!userInfo.containsKey(username)) {
-				ArrayList<String> games = userInfo.get(username).getGames();
+			if (userInfo.containsKey(username)) {
+				JSONArray games = userInfo.get(username).getGames();
 				
 				if(!games.contains(game)) {
+					rootLogger.trace("Adding: " + game + " to user: " + username);
 					userInfo.get(username).addGame(game);
 					lock.writeLock().unlock();
 					rootLogger.trace("Relinquished addGameToUser Lock");
@@ -168,8 +167,8 @@ public class DataStore implements java.io.Serializable {
 		return false;
 	}
 
-	public ArrayList<String> getUserGames(String username) {
-		ArrayList<String> userGames = new ArrayList<String>();
+	public JSONArray getUserGames(String username) {
+		JSONArray userGames = new JSONArray();
 		lock.readLock().lock();
 		rootLogger.trace("Acquired getUserGames Lock");
 		UserData data = userInfo.get(username);
@@ -179,8 +178,9 @@ public class DataStore implements java.io.Serializable {
 		return userGames;
 	}
 	
-	public ArrayList<String> getStoreGames(String username) {
-		ArrayList<String> gameTitles = new ArrayList<String>();
+	@SuppressWarnings("unchecked")
+	public JSONArray getStoreGames(String username) {
+		JSONArray gameTitles = new JSONArray();
 		lock.readLock().lock();
 		rootLogger.trace("Acquired getStoreGames Lock");
 		UserData data = userInfo.get(username);
