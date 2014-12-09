@@ -69,15 +69,15 @@ public class SteamLite {
 			steamSock.close();
 
 		} catch (UnknownHostException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		} catch (IOException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 		
 		try {
 			return (JSONObject) parser.parse(lineText);
 		} catch (ParseException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 			rootLogger.trace("ParseException: " + e);
 			return null;
 		}
@@ -95,6 +95,10 @@ public class SteamLite {
 		obj.put("password", password);
 		
 		obj = serverRequest(obj);
+		if(obj == null) {
+			getInitialServer();
+			return false;
+		}
 		if(!obj.containsKey("library") 
 				|| (!obj.get("library").equals("success") 
 						&& !obj.get("library").equals("failed"))) {
@@ -109,6 +113,7 @@ public class SteamLite {
 			return false;
 		}
 		
+		myLibrary.clear();
 		myLibrary.addAll((Collection<? extends String>) obj.get("games"));
 		
 		File cur = new File("./src/");
@@ -144,6 +149,10 @@ public class SteamLite {
 		obj.put("game", game);
 		
 		obj = serverRequest(obj);
+		if(obj == null) {
+			getInitialServer();
+			return false;
+		}
 		if(!obj.containsKey("download") || !obj.containsKey("game") 
 				|| obj.containsKey("title") 
 				|| (!obj.get("download").equals("success")
@@ -263,7 +272,11 @@ public class SteamLite {
 			obj.put("password", password);
 			//Send Request
 			obj = serverRequest(obj);
-			if(!obj.containsKey("login") 
+			if(obj == null) {
+				getInitialServer();
+				return false;
+			}
+			else if(!obj.containsKey("login") 
 					|| (!obj.get("login").equals("success") 
 							&& !obj.get("login").equals("failed"))) {
 				System.out.println("Sorry, a problem has occurred with the "
@@ -289,6 +302,10 @@ public class SteamLite {
 			obj.put("password", password);
 			//Send Request
 			obj = serverRequest(obj);
+			if(obj == null) {
+				getInitialServer();
+				return false;
+			}
 			if(!obj.containsKey("register") 
 					|| (!obj.get("register").equals("success") 
 							&& !obj.get("register").equals("failed"))) {
@@ -318,6 +335,10 @@ public class SteamLite {
 		obj.put("password", password);
 		//Send Request
 		obj = serverRequest(obj);
+		if(obj == null) {
+			getInitialServer();
+			return false;
+		}
 		if(!obj.containsKey("logout") 
 				|| (!obj.get("logout").equals("success") 
 						&& !obj.get("logout").equals("failed"))) {
@@ -344,6 +365,10 @@ public class SteamLite {
 		obj.put("password", password);
 		obj.put("request", "store");
 		obj = serverRequest(obj);
+		if(obj == null) {
+			getInitialServer();
+			return false;
+		}
 		if(!obj.containsKey("store") || !obj.containsKey("games")
 				|| (!obj.get("store").equals("success") 
 						&& !obj.get("store").equals("failed"))) {
@@ -425,22 +450,27 @@ public class SteamLite {
 	 */
 	@SuppressWarnings("unchecked")
 	private static boolean getInitialServer() {
-		steamServer[0] = discServer[0];
-		steamServer[1] = discServer[1];
+		
 		
 		JSONObject obj = new JSONObject();
 		obj.put("request", "getmaster");
+		if(steamServer[0] != null) {
+			obj.put("master", steamServer[0] + ":" + steamServer[1]);
+		}
+		
+		steamServer[0] = discServer[0];
+		steamServer[1] = discServer[1];
 		
 		obj = serverRequest(obj);
 		if(!obj.containsKey("getmaster") || !obj.containsKey("ip") 
 				|| !obj.containsKey("port") 
-				|| (!obj.get("minserver").equals("success")
-				&& !obj.get("minserver").equals("failed"))) {
+				|| (!obj.get("getmaster").equals("success")
+				&& !obj.get("getmaster").equals("failed"))) {
 			System.out.println("Sorry, a problem has occurred with the "
 					+ "server");
 			return false;
 		}
-		else if(obj.get("minserver").equals("failed")) {
+		else if(obj.get("getmaster").equals("failed")) {
 			System.out.println(obj.get("exception"));
 			return false;
 		}
@@ -462,6 +492,7 @@ public class SteamLite {
 		scan = new Scanner(System.in);
 		parser = new JSONParser();
 		steamServer = new String[2];
+		steamServer[0] = null;
 		discServer = new String[2];
 		
 		if(!getDiscServer(args[0])) {

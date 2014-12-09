@@ -5,6 +5,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 @SuppressWarnings("serial")
 public class DataStore implements java.io.Serializable {
@@ -55,6 +56,7 @@ public class DataStore implements java.io.Serializable {
 	public boolean setMaster(String newMaster) {
 		lock.writeLock().lock();
 		rootLogger.trace("Acquired setMaster Lock");
+		rootLogger.trace("Set Master to: " + newMaster);
 		master = newMaster;
 		lock.writeLock().unlock();
 		rootLogger.trace("Relinquished setMaster Lock");
@@ -71,11 +73,11 @@ public class DataStore implements java.io.Serializable {
 		return masterCopy;
 	}
 	
-	public boolean addUserInfo(String username, String password, String location) {
+	public boolean addUserInfo(String username, String password) {
 		lock.writeLock().lock();
 		rootLogger.trace("Acquired addUserInfo Lock");
 		if (!userInfo.containsKey(username)) {
-			UserData newUser = new UserData(password, location);
+			UserData newUser = new UserData(password);
 			userInfo.put(username, newUser);
 			lock.writeLock().unlock();
 			rootLogger.trace("Relinquished addUserInfo Lock");
@@ -114,12 +116,12 @@ public class DataStore implements java.io.Serializable {
 		return false;
 	}
 	
-	public boolean signIn(String username, String password, String location) {
+	public boolean signIn(String username, String password) {
 		lock.writeLock().lock();
 		rootLogger.trace("Acquired signIn Lock");
 		if(userInfo.containsKey(username) 
 				&& userInfo.get(username).checkPassword(password)) {
-			userInfo.get(username).signIn(password, location);
+			userInfo.get(username).signIn(password);
 			lock.writeLock().unlock();
 			rootLogger.trace("Relinquished signIn Lock");
 			return true;
@@ -134,7 +136,7 @@ public class DataStore implements java.io.Serializable {
 		rootLogger.trace("Acquired signIn Lock");
 		if(userInfo.containsKey(username) 
 				&& userInfo.get(username).checkPassword(password)) {
-			userInfo.get(username).signOut(password, location);
+			userInfo.get(username).signOut(password);
 			lock.writeLock().unlock();
 			rootLogger.trace("Relinquished signOut Lock");
 			return true;
@@ -151,7 +153,7 @@ public class DataStore implements java.io.Serializable {
 			rootLogger.trace("Relinquished register Lock");
 			return false;
 		}
-		UserData newData = new UserData(password, location);
+		UserData newData = new UserData(password);
 		userInfo.put(username, newData);
 		lock.writeLock().unlock();
 		rootLogger.trace("Relinquished register Lock");
@@ -279,13 +281,14 @@ public class DataStore implements java.io.Serializable {
 	/**
 	 * Sets DataStore's entire content to given snapshot
 	 */
-	/*
-	@SuppressWarnings("unchecked")
 	public void setSnapshot(JSONObject snapshot) {
 		rootLogger.trace("Updating server with snapshot");
 		lock.writeLock().lock();
 		rootLogger.trace("Acquired setSnapshot Lock");
 
+		// Set Master
+		master = (String) snapshot.get("master");
+		
 		// Set ServerList
 		JSONArray newServers = (JSONArray) snapshot.get("servers");
 		servers = new ArrayList<String>();
@@ -295,34 +298,37 @@ public class DataStore implements java.io.Serializable {
 			servers.add(server);
 		}
 
-		// Set DataMap
-		JSONObject newData = (JSONObject) snapshot.get("data");
-		dataMap = new HashMap<String, ArrayList<String>>();
-		for (Object obData : newData.keySet()) {
-			String data = (String) obData;
-			ArrayList<String> newDataList = new ArrayList<String>();
-			newDataList.addAll((ArrayList<String>) newData.get(data));
-			dataMap.put(data, newDataList);
+		// Set GameFiles
+		JSONObject newGameFiles = (JSONObject) snapshot.get("gameFiles");
+		gameFiles = new HashMap<String, String>();
+		for (Object game : newGameFiles.keySet()) {
+			gameFiles.put((String) game, (String) newGameFiles.get(game));
 		}
 
-		// Set DataVersionMap
-		JSONObject newVers = (JSONObject) snapshot.get("vers");
-		dataVersionMap = new HashMap<String, Integer>();
-		for (Object obData : newVers.keySet()) {
-			String data = (String) obData;
-			int newVersion = Integer.parseInt((String) newVers.get(data));
-			dataVersionMap.put(data, newVersion);
+		// Set UserInfo
+		JSONObject newUserInfo = (JSONObject) snapshot.get("userInfo");
+		userInfo = new HashMap<String, UserData>();
+		UserData newData;
+		JSONArray infoArray;
+		for (Object user : newUserInfo.keySet()) {
+			infoArray = (JSONArray) newUserInfo.get(user);
+			newData = new UserData((String) infoArray.get(0));
+			if(((String) infoArray.get(1)).equals("false")) {
+				newData.signOut(newData.getPswd());
+			}
+			for(int i = 2; i < infoArray.size(); i++) {
+				newData.addGame((String) infoArray.get(i));
+			}
+			userInfo.put((String) user, newData);
 		}
 
 		lock.writeLock().unlock();
 		rootLogger.trace("Relinquished setSnapshot Lock");
 	}
-	*/
 
 	/**
 	 * Returns a snapshot of the DataStore's entire content
 	 */
-	/*
 	@SuppressWarnings("unchecked")
 	public JSONObject getSnapshot() {
 
@@ -331,6 +337,9 @@ public class DataStore implements java.io.Serializable {
 		lock.readLock().lock();
 		rootLogger.trace("Acquired getSnapshot Lock");
 
+		//Get Master
+		obj.put("master", master);
+		
 		// Get ServerList
 		JSONArray serverListcpy = new JSONArray();
 		for (String original : servers) {
@@ -338,28 +347,35 @@ public class DataStore implements java.io.Serializable {
 		}
 		obj.put("servers", serverListcpy);
 
-		// Get DataMap
-		JSONObject dataMapcpy = new JSONObject();
-		JSONArray temp2;
-		for (String key : dataMap.keySet()) {
-			temp2 = new JSONArray();
-			temp2.addAll(dataMap.get(key));
-			dataMapcpy.put(key, temp2);
+		// Get GameFiles
+		JSONObject gameFilescpy = new JSONObject();
+		for (String key : gameFiles.keySet()) {
+			gameFilescpy.put(key, gameFiles.get(key));
 		}
-		obj.put("data", dataMapcpy);
+		obj.put("gameFiles", gameFilescpy);
 
-		// Get DataVersionMap
-		JSONObject dataVersionMapcpy = new JSONObject();
-		String temp3;
-		for (String key : dataVersionMap.keySet()) {
-			temp3 = dataVersionMap.get(key).toString();
-			dataVersionMapcpy.put(key, temp3);
+		// Get UserInfo
+		JSONObject userInfocpy = new JSONObject();
+		JSONArray infoArray;
+		UserData temp;
+		for (String key : userInfo.keySet()) {
+			infoArray = new JSONArray();
+			temp = userInfo.get(key);
+			infoArray.add(temp.getPswd());
+			if(temp.isSignedIn() == true) {
+				infoArray.add("true");
+			}
+			else {
+				infoArray.add("false");
+			}
+			infoArray.addAll(temp.getGames());
+			
+			userInfocpy.put(key, infoArray);
 		}
-		obj.put("vers", dataVersionMapcpy);
+		obj.put("userInfo", userInfocpy);
 
 		lock.readLock().unlock();
 		rootLogger.trace("Relinquished getSnapshot Lock");
 		return obj;
 	}
-	*/
 }

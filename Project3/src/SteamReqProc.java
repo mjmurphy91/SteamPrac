@@ -65,9 +65,7 @@ public class SteamReqProc implements Runnable {
 					if(obj.get("request").equals("login")) {
 						boolean signedIn = ds.signIn(
 								(String) obj.get("username"), 
-								(String) obj.get("password"),  
-								sock.getInetAddress().toString() 
-								+ ":" + Integer.toString(sock.getPort()));
+								(String) obj.get("password"));
 						if(!signedIn) {
 							JSONObject excObj = new JSONObject();
 							excObj.put("exception", 
@@ -78,6 +76,15 @@ public class SteamReqProc implements Runnable {
 						}
 						else {
 							JSONObject excObj = new JSONObject();
+							ArrayList<String> servers = ds.getServersList();
+							Collections.sort(servers);
+							if(ds.getSelf().equals(ds.getMaster())) {
+								for(String server: servers) {
+									if(server != ds.getSelf()) {
+										serverRequest(obj, server.split(":"));
+									}
+								}
+							}
 							excObj.put("login", "success");
 							rootLogger.trace("Login success");
 							sendJSON(excObj);
@@ -98,6 +105,15 @@ public class SteamReqProc implements Runnable {
 							sendJSON(excObj);
 						}
 						else {
+							ArrayList<String> servers = ds.getServersList();
+							Collections.sort(servers);
+							if(ds.getSelf().equals(ds.getMaster())) {
+								for(String server: servers) {
+									if(server != ds.getSelf()) {
+										serverRequest(obj, server.split(":"));
+									}
+								}
+							}
 							JSONObject excObj = new JSONObject();
 							excObj.put("register", "success");
 							rootLogger.trace("Registration successful");
@@ -139,6 +155,15 @@ public class SteamReqProc implements Runnable {
 							sendJSON(excObj);
 						}
 						else {
+							ArrayList<String> servers = ds.getServersList();
+							Collections.sort(servers);
+							if(ds.getSelf().equals(ds.getMaster())) {
+								for(String server: servers) {
+									if(server != ds.getSelf()) {
+										serverRequest(obj, server.split(":"));
+									}
+								}
+							}
 							JSONObject excObj = new JSONObject();
 							excObj.put("buy", "success");
 							rootLogger.trace("Game successfuly purchased");
@@ -185,6 +210,15 @@ public class SteamReqProc implements Runnable {
 							sendJSON(excObj);
 						}
 						else {
+							ArrayList<String> servers = ds.getServersList();
+							Collections.sort(servers);
+							if(ds.getSelf().equals(ds.getMaster())) {
+								for(String server: servers) {
+									if(server != ds.getSelf()) {
+										serverRequest(obj, server.split(":"));
+									}
+								}
+							}
 							JSONObject excObj = new JSONObject();
 							excObj.put("logout", "success");
 							rootLogger.trace("Signed out successfully");
@@ -198,8 +232,9 @@ public class SteamReqProc implements Runnable {
 						sendJSON(excObj);
 					}
 				}
-				//Announce Self
-				else if (obj.get("request").equals("announce")
+				//Announced
+				else if (obj.containsKey("request") 
+						&& obj.get("request").equals("announce")
 						&& obj.containsKey("newserver")) {
 					ds.addServer((String) obj.get("newserver"));
 					
@@ -207,18 +242,58 @@ public class SteamReqProc implements Runnable {
 					excObj.put("announce", "success");
 					rootLogger.trace("New Server Added from Announcement");
 					sendJSON(excObj);
+					
+					ArrayList<String> servers = ds.getServersList();
+					Collections.sort(servers);
+					if(ds.getSelf().equals(ds.getMaster())) {
+						JSONObject snapshot = ds.getSnapshot();
+						snapshot.put("request", "snapshot");
+						serverRequest(snapshot, 
+								((String) obj.get("newserver")).split(":"));
+						for(String server: servers) {
+							if(!server.equals(ds.getSelf()) 
+									&& !server.equals(
+											(String) obj.get("newserver"))) {
+								serverRequest(obj, server.split(":"));
+							}
+						}
+					}
+				}
+				//Snapshot
+				else if (obj.containsKey("request") 
+						&& obj.get("request").equals("snapshot")) {
+					ds.setSnapshot(obj);
+					JSONObject excObj = new JSONObject();
+					excObj.put("snapshot", "success");
+					rootLogger.trace("Snapshot placed");
+					sendJSON(excObj);
 				}
 				//Alive Check
-				else if (obj.get("request").equals("alive")) {
+				else if (obj.containsKey("request") 
+						&& obj.get("request").equals("alive")) {
 					JSONObject excObj = new JSONObject();
 					excObj.put("alive", "success");
 					rootLogger.trace("Replied that it's alive");
 					sendJSON(excObj);
 				}
 				//Update Master
-				else if (obj.get("request").equals("master")
+				else if (obj.containsKey("request") 
+						&& obj.get("request").equals("master")
 						&& obj.containsKey("master")) {
 					ds.setMaster((String) obj.get("master"));
+					ArrayList<String> servers = ds.getServersList();
+					Collections.sort(servers);
+					if(ds.getSelf().equals(ds.getMaster())) {
+						obj = ds.getSnapshot();
+						obj.put("request", "snapshot");
+						for(String server: servers) {
+							if(server != ds.getSelf()) {
+								if(serverRequest(obj, server.split(":")) == null) {
+									ds.removeServer(server);
+								}
+							}
+						}
+					}
 					
 					JSONObject excObj = new JSONObject();
 					excObj.put("master", "success");
@@ -227,14 +302,15 @@ public class SteamReqProc implements Runnable {
 					sendJSON(excObj);
 				}
 				//Election
-				else if (obj.get("request").equals("elect")) {
+				else if (obj.containsKey("request") 
+						&& obj.get("request").equals("elect")) {
 					obj.clear();
 					obj.put("request", "alive");
 					obj = serverRequest(obj, ds.getMaster().split(":"));
 					
 					JSONObject excObj = new JSONObject();
 					if(obj == null) {
-						ds.removeServer("master");
+						ds.removeServer(ds.getMaster());
 						bully();
 						excObj.put("elect", "success");
 					}
@@ -243,8 +319,6 @@ public class SteamReqProc implements Runnable {
 					}
 					excObj.put("master", ds.getMaster());
 					
-					rootLogger.trace("Master Updated to:" 
-							+ (String) obj.get("master"));
 					sendJSON(excObj);
 				}
 				//No Request

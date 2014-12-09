@@ -80,15 +80,17 @@ public class DiscReqProc implements Runnable {
 			steamSock.close();
 
 		} catch (UnknownHostException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
+			rootLogger.trace("UnknownHostException: " + e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
+			rootLogger.trace("IOException: " + e);
 		}
 		
 		try {
 			return (JSONObject) parser.parse(lineText);
 		} catch (ParseException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 			rootLogger.trace("ParseException: " + e);
 			return null;
 		}
@@ -129,16 +131,16 @@ public class DiscReqProc implements Runnable {
 							obj.put("request", "alive");
 							obj = serverRequest(obj, ds.getMaster());
 							
-							JSONObject excObj = new JSONObject();
 							if(obj == null) {
 								ds.removeServer("master");
 								obj = new JSONObject();
 								obj.put("request", "elect");
 								ArrayList<String> servers = ds.getServersList();
+								JSONObject obj2;
 								for(String server: servers) {
-									obj = serverRequest(excObj, server);
-									if(obj != null && obj.containsKey("master")) {
-										ds.setMaster((String) obj.get("master"));
+									obj2 = serverRequest(obj, server);
+									if(obj2 != null && obj2.containsKey("master")) {
+										ds.setMaster((String) obj2.get("master"));
 										break;
 									}
 								}
@@ -158,21 +160,20 @@ public class DiscReqProc implements Runnable {
 					else if(obj.get("request").equals("announce") 
 							&& obj.containsKey("self")) {
 						String self = (String) obj.get("self");
-						ArrayList<String> servers = ds.getServersList();
 						ds.addServer(self);
 						
-						obj = new JSONObject();
+						if(!self.equals(ds.getMaster())) {
+							obj.clear();
+							obj.put("request", "announce");
+							obj.put("newserver", self);
+							serverRequest(obj, ds.getMaster());
+						}
+						
+						obj.clear();
 						obj.put("announce", "success");
 						String master = ds.getMaster();
 						obj.put("master", master);
 						sendJSON(obj);
-						
-						obj = new JSONObject();
-						obj.put("request", "announce");
-						obj.put("newserver", self);
-						for(String server : servers) {
-							serverRequest(obj, server);
-						}
 					}
 					//Update Master
 					else if(obj.get("request").equals("master") 

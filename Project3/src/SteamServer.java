@@ -15,6 +15,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 
 public class SteamServer {
@@ -41,7 +43,7 @@ public class SteamServer {
 		ServerSocket serversock = new ServerSocket(PORT);
 		Socket sock;
 		String discServer = readConfig(args[1], ds);
-		annouceSelf(self, discServer);
+		annouceSelf(self, discServer, ds);
 		
 		while (true) {
 			sock = new Socket();
@@ -74,10 +76,12 @@ public class SteamServer {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static void annouceSelf(String self, String discServer) {
+	public static void annouceSelf(String self, String discServer, DataStore ds) {
 		String[] discParts = discServer.split(":");
 		Socket steamSock;
+		String lineText = "";
 		JSONObject request = new JSONObject();
+		JSONParser parser = new JSONParser();
 		request.put("request", "announce");
 		request.put("self", self);
 		
@@ -99,15 +103,21 @@ public class SteamServer {
 			int bufferSize = Integer.parseInt(line.split(" ")[1]);
 			char[] bytes = new char[bufferSize];
 			in.read(bytes, 0, bufferSize);
+			lineText = new String(bytes);
 						
 			out.flush();
 			out.close();
 			in.close();
 			steamSock.close();
+			
+			JSONObject obj = (JSONObject) parser.parse(lineText);
+			ds.setMaster((String) obj.get("master"));
 
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ParseException e) {
 			e.printStackTrace();
 		}
 	}
