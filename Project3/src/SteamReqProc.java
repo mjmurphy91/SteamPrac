@@ -8,6 +8,8 @@ import java.nio.charset.Charset;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,7 +27,7 @@ public class SteamReqProc implements Runnable {
 	private DataStore ds;
 	private JSONParser parser;
 	
-	public SteamReqProc(Socket sock, DataStore ds) {
+	public SteamReqProc(String discServer, Socket sock, DataStore ds) {
 		this.sock = sock;
 		this.ds = ds;
 		parser = new JSONParser();
@@ -61,13 +63,15 @@ public class SteamReqProc implements Runnable {
 						&& obj.containsKey("password")) {
 					//Login
 					if(obj.get("request").equals("login")) {
-						boolean signedIn = ds.signIn((String) obj.get("username"), 
+						boolean signedIn = ds.signIn(
+								(String) obj.get("username"), 
 								(String) obj.get("password"),  
 								sock.getInetAddress().toString() 
 								+ ":" + Integer.toString(sock.getPort()));
 						if(!signedIn) {
 							JSONObject excObj = new JSONObject();
-							excObj.put("exception", "Incorrect username or password");
+							excObj.put("exception", 
+									"Incorrect username or password");
 							excObj.put("login", "failed");
 							rootLogger.trace("Login failed");
 							sendJSON(excObj);
@@ -81,7 +85,8 @@ public class SteamReqProc implements Runnable {
 					}
 					//Register a new User
 					else if (obj.get("request").equals("register")) {
-						boolean registered = ds.register((String) obj.get("username"), 
+						boolean registered = ds.register(
+								(String) obj.get("username"), 
 								(String) obj.get("password"),  
 								sock.getInetAddress().toString() 
 								+ ":" + Integer.toString(sock.getPort()));
@@ -103,7 +108,8 @@ public class SteamReqProc implements Runnable {
 					else if(obj.get("request").equals("library")) {
 						JSONObject excObj = new JSONObject();
 						excObj.put("library", "success");
-						JSONArray games = ds.getUserGames((String) obj.get("username"));
+						JSONArray games = ds.getUserGames(
+								(String) obj.get("username"));
 						excObj.put("games", games);
 						rootLogger.trace("Request for user Library complete");
 						sendJSON(excObj);
@@ -112,7 +118,8 @@ public class SteamReqProc implements Runnable {
 					else if (obj.get("request").equals("store")) {
 						JSONObject excObj = new JSONObject();
 						excObj.put("store", "success");
-						JSONArray games = ds.getStoreGames((String) obj.get("username"));
+						JSONArray games = ds.getStoreGames(
+								(String) obj.get("username"));
 						excObj.put("games", games);
 						rootLogger.trace("Request for Store Games complete");
 						sendJSON(excObj);
@@ -120,11 +127,13 @@ public class SteamReqProc implements Runnable {
 					//Buy Game
 					else if (obj.get("request").equals("buy")
 							&& obj.containsKey("game")) {
-						boolean gameAdded = ds.addGameToUser((String) obj.get("username"), 
+						boolean gameAdded = ds.addGameToUser(
+								(String) obj.get("username"), 
 								(String) obj.get("game"));
 						if(!gameAdded) {
 							JSONObject excObj = new JSONObject();
-							excObj.put("exception", "Game could not be purchased");
+							excObj.put("exception", 
+									"Game could not be purchased");
 							excObj.put("buy", "failed");
 							rootLogger.trace("Purchase not successful");
 							sendJSON(excObj);
@@ -142,14 +151,17 @@ public class SteamReqProc implements Runnable {
 						String file = ds.getGameFile((String) obj.get("game"));
 						if(file == null) {
 							JSONObject excObj = new JSONObject();
-							excObj.put("exception", "Game has not been purchased");
+							excObj.put("exception", 
+									"Game has not been purchased");
 							excObj.put("download", "failed");
 							rootLogger.trace("Download not successful");
 							sendJSON(excObj);
 						}
 						else {
-							Path path = FileSystems.getDefault().getPath(".", file);
-							String game = Files.readAllLines(path, Charset.defaultCharset()).get(0);
+							Path path = FileSystems.getDefault().getPath(".", 
+									file);
+							String game = Files.readAllLines(path, 
+									Charset.defaultCharset()).get(0);
 							JSONObject excObj = new JSONObject();
 							excObj.put("download", "success");
 							excObj.put("game", game);
@@ -160,7 +172,8 @@ public class SteamReqProc implements Runnable {
 					}
 					//Logout
 					else if (obj.get("request").equals("logout")) {
-						boolean signedOut = ds.signOut((String) obj.get("username"), 
+						boolean signedOut = ds.signOut(
+								(String) obj.get("username"), 
 								(String) obj.get("password"),  
 								sock.getInetAddress().toString() 
 								+ ":" + Integer.toString(sock.getPort()));
@@ -185,9 +198,59 @@ public class SteamReqProc implements Runnable {
 						sendJSON(excObj);
 					}
 				}
+				//Announce Self
+				else if (obj.get("request").equals("announce")
+						&& obj.containsKey("newserver")) {
+					ds.addServer((String) obj.get("newserver"));
+					
+					JSONObject excObj = new JSONObject();
+					excObj.put("announce", "success");
+					rootLogger.trace("New Server Added from Announcement");
+					sendJSON(excObj);
+				}
+				//Alive Check
+				else if (obj.get("request").equals("alive")) {
+					JSONObject excObj = new JSONObject();
+					excObj.put("alive", "success");
+					rootLogger.trace("Replied that it's alive");
+					sendJSON(excObj);
+				}
+				//Update Master
+				else if (obj.get("request").equals("master")
+						&& obj.containsKey("master")) {
+					ds.setMaster((String) obj.get("master"));
+					
+					JSONObject excObj = new JSONObject();
+					excObj.put("master", "success");
+					rootLogger.trace("Master Updated to:" 
+							+ (String) obj.get("master"));
+					sendJSON(excObj);
+				}
+				//Election
+				else if (obj.get("request").equals("elect")) {
+					obj.clear();
+					obj.put("request", "alive");
+					obj = serverRequest(obj, ds.getMaster().split(":"));
+					
+					JSONObject excObj = new JSONObject();
+					if(obj == null) {
+						ds.removeServer("master");
+						bully();
+						excObj.put("elect", "success");
+					}
+					else {
+						excObj.put("elect", "failed");
+					}
+					excObj.put("master", ds.getMaster());
+					
+					rootLogger.trace("Master Updated to:" 
+							+ (String) obj.get("master"));
+					sendJSON(excObj);
+				}
+				//No Request
 				else {
 					JSONObject excObj = new JSONObject();
-					excObj.put("exception", "No request given");
+					excObj.put("exception", "No recognized request given");
 					rootLogger.trace("IOException occurred");
 					sendJSON(excObj);
 				}
@@ -210,12 +273,10 @@ public class SteamReqProc implements Runnable {
 		} catch (IOException e) {
 			rootLogger.trace("Problem closing socket");
 		}
-		
 		rootLogger.trace("Finished Working\n");	
-		
 	}
 	
-	public void sendJSON(JSONObject obj) {
+	private boolean sendJSON(JSONObject obj) {
 		try {
 			String requestbody = obj.toJSONString();
 			String requestheaders = "Content-Length: "
@@ -226,12 +287,94 @@ public class SteamReqProc implements Runnable {
 						
 			out.flush();
 			out.close();
+			return true;
 
 		} catch (UnknownHostException e) {
-			e.printStackTrace();
+			return false;
 		} catch (IOException e) {
-			e.printStackTrace();
+			return false;
 		}
+	}
+	
+	private JSONObject serverRequest(JSONObject request, 
+			String[] steamServer) {
+		String lineText = "";
+		Socket steamSock;
+		
+		try {
+			steamSock = new Socket(steamServer[0], 
+					Integer.parseInt(steamServer[1]));
+
+			String requestbody = request.toJSONString();
+			String requestheaders = "Content-Length: "
+					+ requestbody.getBytes().length + "\n";
+			OutputStream out = steamSock.getOutputStream();
+			out.write(requestheaders.getBytes());
+			out.write(requestbody.getBytes());
+
+			String line;
+			BufferedReader in = new BufferedReader(new InputStreamReader(
+					steamSock.getInputStream()));
+
+			line = in.readLine();
+			rootLogger.trace("Received line: " + line);
+			int bufferSize = Integer.parseInt(line.split(" ")[1]);
+			rootLogger.trace("Buffer Size: " + bufferSize);
+			char[] bytes = new char[bufferSize];
+			in.read(bytes, 0, bufferSize);
+			lineText = new String(bytes);
+			rootLogger.trace("LineText: " + lineText);
+						
+			out.flush();
+			out.close();
+			in.close();
+			steamSock.close();
+
+		} catch (UnknownHostException e) {
+			return null;
+		} catch (IOException e) {
+			return null;
+		}
+		
+		try {
+			return (JSONObject) parser.parse(lineText);
+		} catch (ParseException e) {
+			e.printStackTrace();
+			rootLogger.trace("ParseException: " + e);
+			return null;
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void bully() {
+		ArrayList<String> servers = ds.getServersList();
+		Collections.sort(servers);
+		String master = "";
+		
+		JSONObject obj = new JSONObject();
+		obj.put("request", "alive");
+		
+		for(String server: servers) {
+			if(serverRequest(obj, server.split(":")) != null) {
+				master = server;
+				break;
+			}
+			else {
+				ds.removeServer(server);
+			}
+		}
+		
+		obj.clear();
+		obj.put("request", "master");
+		obj.put("master", master);
+		
+		for(String server: servers) {
+			if(server != ds.getSelf()) {
+				serverRequest(obj, server.split(":"));
+			}
+		}
+		
+		ds.setMaster(master);
 	}
 
 }

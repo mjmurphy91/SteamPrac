@@ -6,8 +6,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.json.simple.JSONObject;
 import org.junit.Test;
@@ -305,7 +303,7 @@ public class TestSteamServer {
 	
 	public void startServer() {
 		int numFE = 1;
-		ExecutorService executor = Executors.newFixedThreadPool(numFE + 2);
+		//ExecutorService executor = Executors.newFixedThreadPool(numFE + 2);
 		
 		try {
 			//executor.execute(new RunDiscServer());
@@ -314,7 +312,7 @@ public class TestSteamServer {
 			Thread.sleep(1000);
 			
 			if (numFE > 0) {
-				String PORT = "235";
+				//String PORT = "235";
 				for(int i = 0; i < numFE; i++) {
 					//executor.execute(new RunFEServer(PORT+Integer.toString(i)));
 				}

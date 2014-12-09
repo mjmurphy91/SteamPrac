@@ -187,7 +187,7 @@ public class SteamLite {
 	/**
 	 * Play the chosen game.
 	 */
-	//TODO
+	//TODO: Multiplayer
 	private static void playGame(int choice) {
 		if(!gamesLibrary.containsKey(myLibrary.get(choice).replaceAll(" ", ""))) {
 			System.out.println("Game is now downloading");
@@ -423,62 +423,32 @@ public class SteamLite {
 	/**
 	 * Gets the SteamServer SteamLite will connect to
 	 */
-	//TODO
+	@SuppressWarnings("unchecked")
 	private static boolean getInitialServer() {
-		String lineText = "";
-		Socket discSock;
-		try {
-			String IP = discServer[0];
-			int PORT = Integer.parseInt(discServer[1]);
-			discSock = new Socket(IP, PORT);
-			String requestheaders = "GET /tweets HTTP/1.1\n";
-
-			OutputStream out = discSock.getOutputStream();
-			out.write(requestheaders.getBytes());
-
-			String line;
-			BufferedReader in = new BufferedReader(new InputStreamReader(
-					discSock.getInputStream()));
-
-			while (!(line = in.readLine().trim()).equals("")) {
-				if(line.equalsIgnoreCase("HTTP/1.1 200 OK")) {
-					line = in.readLine();
-					int bufferSize = Integer.parseInt(line.split(" ")[1]);
-					line = in.readLine();
-					char[] bytes = new char[bufferSize];
-					in.read(bytes, 0, bufferSize);
-					lineText = new String(bytes);
-					break;
-				}
-				else {
-					lineText = line;
-				}
-			}			
-			out.flush();
-			out.close();
-			in.close();
-			discSock.close();
-
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		steamServer[0] = discServer[0];
+		steamServer[1] = discServer[1];
 		
-		String server = "";
-		JSONParser parser = new JSONParser();
-		try {
-			JSONObject obj=(JSONObject) parser.parse(lineText);
-			server = (String) obj.get("min");
-		} catch (ParseException e) {
-			System.out.println("Could not parse lineText");
-		}
+		JSONObject obj = new JSONObject();
+		obj.put("request", "getmaster");
 		
-		if(server.split(":").length == 2) {
-			steamServer = server.split(":");
+		obj = serverRequest(obj);
+		if(!obj.containsKey("getmaster") || !obj.containsKey("ip") 
+				|| !obj.containsKey("port") 
+				|| (!obj.get("minserver").equals("success")
+				&& !obj.get("minserver").equals("failed"))) {
+			System.out.println("Sorry, a problem has occurred with the "
+					+ "server");
+			return false;
+		}
+		else if(obj.get("minserver").equals("failed")) {
+			System.out.println(obj.get("exception"));
+			return false;
+		}
+		else {
+			steamServer[0] = (String) obj.get("ip");
+			steamServer[1] = (String) obj.get("port");
 			return true;
-		}
-		return false;
+		}	
 	}
 	
 	public static void main(String[] args) {
@@ -491,15 +461,17 @@ public class SteamLite {
 		gamesLibrary = new HashMap<String, Game>();
 		scan = new Scanner(System.in);
 		parser = new JSONParser();
+		steamServer = new String[2];
+		discServer = new String[2];
 		
 		if(!getDiscServer(args[0])) {
 			System.exit(0);
 		}
 		
-		//while(!getInitialServer());
-		steamServer = new String[2];
-		steamServer[0] = "192.168.1.4";
-		steamServer[1] = "2345";
+		while(!getInitialServer());
+//		steamServer = new String[2];
+//		steamServer[0] = "192.168.1.4";
+//		steamServer[1] = "2345";
 		
 		while(!login());
 		

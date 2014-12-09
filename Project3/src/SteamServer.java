@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.json.simple.JSONObject;
+
 
 public class SteamServer {
 
@@ -39,13 +41,13 @@ public class SteamServer {
 		ServerSocket serversock = new ServerSocket(PORT);
 		Socket sock;
 		String discServer = readConfig(args[1], ds);
-		//annouceSelf(self, discServer);
+		annouceSelf(self, discServer);
 		
 		while (true) {
 			sock = new Socket();
 			sock = serversock.accept();
 			sock.setSoTimeout(10000);
-			executor.execute(new SteamReqProc(sock, ds));
+			executor.execute(new SteamReqProc(discServer, sock, ds));
 		}
 	}
 		
@@ -71,35 +73,37 @@ public class SteamServer {
 		return server;
 	}
 	
-	/*
+	@SuppressWarnings("unchecked")
 	public static void annouceSelf(String self, String discServer) {
 		String[] discParts = discServer.split(":");
-		String lineText = "";
-		Socket discSock;
+		Socket steamSock;
+		JSONObject request = new JSONObject();
+		request.put("request", "announce");
+		request.put("self", self);
+		
 		try {
-			//Send request to DiscServer
-			String IP = discParts[0];
-			int PORT = Integer.parseInt(discParts[1]);
-			discSock = new Socket(IP, PORT);
-			String requestheaders = "POST /steam?me=" + self + " HTTP/1.1\n";
+			steamSock = new Socket(discParts[0], Integer.parseInt(discParts[1]));
 
-			OutputStream out = discSock.getOutputStream();
+			String requestbody = request.toJSONString();
+			String requestheaders = "Content-Length: "
+					+ requestbody.getBytes().length + "\n";
+			OutputStream out = steamSock.getOutputStream();
+			out.write(requestheaders.getBytes());
+			out.write(requestbody.getBytes());
+
+			String line;
 			BufferedReader in = new BufferedReader(new InputStreamReader(
-					discSock.getInputStream()));
-			String line = "";
-			
-			while(!lineText.equalsIgnoreCase("HTTP/1.1 200 OK")) {
-				out.write(requestheaders.getBytes());
+					steamSock.getInputStream()));
 
-				while (!(line = in.readLine().trim()).equals("")) {
-						lineText = line;
-				}
-
-			}
+			line = in.readLine();
+			int bufferSize = Integer.parseInt(line.split(" ")[1]);
+			char[] bytes = new char[bufferSize];
+			in.read(bytes, 0, bufferSize);
+						
 			out.flush();
 			out.close();
 			in.close();
-			discSock.close();
+			steamSock.close();
 
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
@@ -107,5 +111,4 @@ public class SteamServer {
 			e.printStackTrace();
 		}
 	}
-	*/
 }

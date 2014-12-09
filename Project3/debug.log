@@ -1,0 +1,294 @@
+02:13:34:103 [trace] DataStore.java:156 main: Acquired addGame Lock
+02:13:34:105 [trace] DataStore.java:160 main: Relinquished addGame Lock
+02:13:34:106 [trace] DataStore.java:156 main: Acquired addGame Lock
+02:13:34:106 [trace] DataStore.java:160 main: Relinquished addGame Lock
+02:13:58:118 [trace] SteamReqProc.java:46 pool-2-thread-1: Received line: Content-Length: 56
+02:13:58:119 [trace] SteamReqProc.java:49 pool-2-thread-1: Buffer Size: 56
+02:13:58:119 [trace] SteamReqProc.java:54 pool-2-thread-1: JsonText: {"username":"mjm","request":"register","password":"mjm"}
+02:13:58:121 [trace] DataStore.java:126 pool-2-thread-1: Acquired register Lock
+02:13:58:122 [trace] DataStore.java:134 pool-2-thread-1: Relinquished register Lock
+02:13:58:123 [trace] SteamReqProc.java:98 pool-2-thread-1: Registration successful
+02:13:58:125 [trace] SteamReqProc.java:214 pool-2-thread-1: Finished Working
+
+02:13:58:132 [trace] SteamLite.java:58 main: Received line: Content-Length: 22
+02:13:58:133 [trace] SteamLite.java:60 main: Buffer Size: 22
+02:13:58:134 [trace] SteamLite.java:64 main: LineText: {"register":"success"}
+02:13:58:135 [trace] SteamLite.java:91 main: fillLibrary Called
+02:13:58:136 [trace] SteamReqProc.java:46 pool-2-thread-2: Received line: Content-Length: 55
+02:13:58:137 [trace] SteamReqProc.java:49 pool-2-thread-2: Buffer Size: 55
+02:13:58:137 [trace] SteamReqProc.java:54 pool-2-thread-2: JsonText: {"username":"mjm","request":"library","password":"mjm"}
+02:13:58:138 [trace] DataStore.java:172 pool-2-thread-2: Acquired getUserGames Lock
+02:13:58:139 [trace] DataStore.java:176 pool-2-thread-2: Relinquished getUserGames Lock
+02:13:58:139 [trace] SteamReqProc.java:108 pool-2-thread-2: Request for user Library complete
+02:13:58:139 [trace] SteamReqProc.java:214 pool-2-thread-2: Finished Working
+
+02:13:58:139 [trace] SteamLite.java:58 main: Received line: Content-Length: 32
+02:13:58:140 [trace] SteamLite.java:60 main: Buffer Size: 32
+02:13:58:140 [trace] SteamLite.java:64 main: LineText: {"games":[],"library":"success"}
+02:14:00:858 [trace] SteamReqProc.java:46 pool-2-thread-3: Received line: Content-Length: 53
+02:14:00:858 [trace] SteamReqProc.java:49 pool-2-thread-3: Buffer Size: 53
+02:14:00:859 [trace] SteamReqProc.java:54 pool-2-thread-3: JsonText: {"username":"mjm","request":"store","password":"mjm"}
+02:14:00:859 [trace] DataStore.java:184 pool-2-thread-3: Acquired getStoreGames Lock
+02:14:00:859 [trace] DataStore.java:196 pool-2-thread-3: Relinquished getStoreGames Lock
+02:14:00:859 [trace] SteamReqProc.java:117 pool-2-thread-3: Request for Store Games complete
+02:14:00:860 [trace] SteamReqProc.java:214 pool-2-thread-3: Finished Working
+
+02:14:00:860 [trace] SteamLite.java:58 main: Received line: Content-Length: 57
+02:14:00:861 [trace] SteamLite.java:60 main: Buffer Size: 57
+02:14:00:861 [trace] SteamLite.java:64 main: LineText: {"games":["Tick Tack Toe","Coin Flip"],"store":"success"}
+02:14:19:157 [trace] SteamReqProc.java:46 pool-2-thread-4: Received line: Content-Length: 62
+02:14:19:158 [trace] SteamReqProc.java:49 pool-2-thread-4: Buffer Size: 62
+02:14:19:158 [trace] SteamReqProc.java:54 pool-2-thread-4: JsonText: {"username":"mjm","request":"buy","game":"1","password":"mjm"}
+02:14:19:158 [trace] DataStore.java:70 pool-2-thread-4: Acquired addGameToUser Lock
+02:14:19:158 [trace] DataStore.java:90 pool-2-thread-4: Relinquished addGameToUser Lock
+02:14:19:159 [trace] SteamReqProc.java:129 pool-2-thread-4: Purchase not successful
+02:14:19:160 [trace] SteamLite.java:58 main: Received line: Content-Length: 58
+02:14:19:160 [trace] SteamLite.java:60 main: Buffer Size: 58
+02:14:19:160 [trace] SteamLite.java:64 main: LineText: {"buy":"failed","exception":"Game could not be purchased"}
+02:14:19:160 [trace] SteamReqProc.java:214 pool-2-thread-4: Finished Working
+
+02:18:36:330 [trace] DataStore.java:157 main: Acquired addGame Lock
+02:18:36:332 [trace] DataStore.java:161 main: Relinquished addGame Lock
+02:18:36:332 [trace] DataStore.java:157 main: Acquired addGame Lock
+02:18:36:332 [trace] DataStore.java:161 main: Relinquished addGame Lock
+02:18:56:025 [trace] SteamReqProc.java:46 pool-2-thread-1: Received line: Content-Length: 56
+02:18:56:025 [trace] SteamReqProc.java:49 pool-2-thread-1: Buffer Size: 56
+02:18:56:025 [trace] SteamReqProc.java:54 pool-2-thread-1: JsonText: {"username":"mjm","request":"register","password":"mjm"}
+02:18:56:028 [trace] DataStore.java:127 pool-2-thread-1: Acquired register Lock
+02:18:56:029 [trace] DataStore.java:135 pool-2-thread-1: Relinquished register Lock
+02:18:56:029 [trace] SteamReqProc.java:98 pool-2-thread-1: Registration successful
+02:18:56:032 [trace] SteamReqProc.java:214 pool-2-thread-1: Finished Working
+
+02:18:56:039 [trace] SteamLite.java:58 main: Received line: Content-Length: 22
+02:18:56:041 [trace] SteamLite.java:60 main: Buffer Size: 22
+02:18:56:041 [trace] SteamLite.java:64 main: LineText: {"register":"success"}
+02:18:56:043 [trace] SteamLite.java:91 main: fillLibrary Called
+02:18:56:045 [trace] SteamReqProc.java:46 pool-2-thread-2: Received line: Content-Length: 55
+02:18:56:045 [trace] SteamReqProc.java:49 pool-2-thread-2: Buffer Size: 55
+02:18:56:045 [trace] SteamReqProc.java:54 pool-2-thread-2: JsonText: {"username":"mjm","request":"library","password":"mjm"}
+02:18:56:046 [trace] DataStore.java:173 pool-2-thread-2: Acquired getUserGames Lock
+02:18:56:046 [trace] DataStore.java:177 pool-2-thread-2: Relinquished getUserGames Lock
+02:18:56:046 [trace] SteamReqProc.java:108 pool-2-thread-2: Request for user Library complete
+02:18:56:047 [trace] SteamReqProc.java:214 pool-2-thread-2: Finished Working
+
+02:18:56:047 [trace] SteamLite.java:58 main: Received line: Content-Length: 32
+02:18:56:048 [trace] SteamLite.java:60 main: Buffer Size: 32
+02:18:56:048 [trace] SteamLite.java:64 main: LineText: {"games":[],"library":"success"}
+02:19:01:318 [trace] SteamReqProc.java:46 pool-2-thread-3: Received line: Content-Length: 53
+02:19:01:319 [trace] SteamReqProc.java:49 pool-2-thread-3: Buffer Size: 53
+02:19:01:319 [trace] SteamReqProc.java:54 pool-2-thread-3: JsonText: {"username":"mjm","request":"store","password":"mjm"}
+02:19:01:319 [trace] DataStore.java:185 pool-2-thread-3: Acquired getStoreGames Lock
+02:19:01:320 [trace] DataStore.java:197 pool-2-thread-3: Relinquished getStoreGames Lock
+02:19:01:320 [trace] SteamReqProc.java:117 pool-2-thread-3: Request for Store Games complete
+02:19:01:320 [trace] SteamReqProc.java:214 pool-2-thread-3: Finished Working
+
+02:19:01:320 [trace] SteamLite.java:58 main: Received line: Content-Length: 57
+02:19:01:321 [trace] SteamLite.java:60 main: Buffer Size: 57
+02:19:01:321 [trace] SteamLite.java:64 main: LineText: {"games":["Tick Tack Toe","Coin Flip"],"store":"success"}
+02:19:07:271 [trace] SteamReqProc.java:46 pool-2-thread-4: Received line: Content-Length: 62
+02:19:07:272 [trace] SteamReqProc.java:49 pool-2-thread-4: Buffer Size: 62
+02:19:07:272 [trace] SteamReqProc.java:54 pool-2-thread-4: JsonText: {"username":"mjm","request":"buy","game":"1","password":"mjm"}
+02:19:07:272 [trace] DataStore.java:70 pool-2-thread-4: Acquired addGameToUser Lock
+02:19:07:272 [trace] DataStore.java:79 pool-2-thread-4: Adding: Coin Flip to user: mjm
+02:19:07:273 [trace] DataStore.java:82 pool-2-thread-4: Relinquished addGameToUser Lock
+02:19:07:273 [trace] SteamReqProc.java:135 pool-2-thread-4: Game successfuly purchased
+02:19:07:273 [trace] SteamReqProc.java:214 pool-2-thread-4: Finished Working
+
+02:19:07:273 [trace] SteamLite.java:58 main: Received line: Content-Length: 17
+02:19:07:274 [trace] SteamLite.java:60 main: Buffer Size: 17
+02:19:07:274 [trace] SteamLite.java:64 main: LineText: {"buy":"success"}
+02:19:07:274 [trace] SteamLite.java:91 main: fillLibrary Called
+02:19:07:276 [trace] SteamReqProc.java:46 pool-2-thread-5: Received line: Content-Length: 55
+02:19:07:276 [trace] SteamReqProc.java:49 pool-2-thread-5: Buffer Size: 55
+02:19:07:276 [trace] SteamReqProc.java:54 pool-2-thread-5: JsonText: {"username":"mjm","request":"library","password":"mjm"}
+02:19:07:276 [trace] DataStore.java:173 pool-2-thread-5: Acquired getUserGames Lock
+02:19:07:277 [trace] DataStore.java:177 pool-2-thread-5: Relinquished getUserGames Lock
+02:19:07:277 [trace] SteamReqProc.java:108 pool-2-thread-5: Request for user Library complete
+02:19:07:277 [trace] SteamReqProc.java:214 pool-2-thread-5: Finished Working
+
+02:19:07:277 [trace] SteamLite.java:58 main: Received line: Content-Length: 43
+02:19:07:278 [trace] SteamLite.java:60 main: Buffer Size: 43
+02:19:07:278 [trace] SteamLite.java:64 main: LineText: {"games":["Coin Flip"],"library":"success"}
+02:22:34:707 [trace] SteamReqProc.java:46 pool-2-thread-6: Received line: Content-Length: 53
+02:22:34:722 [trace] SteamReqProc.java:49 pool-2-thread-6: Buffer Size: 53
+02:22:34:723 [trace] SteamReqProc.java:54 pool-2-thread-6: JsonText: {"username":"mjm","request":"login","password":"mjm"}
+02:22:34:723 [trace] DataStore.java:97 pool-2-thread-6: Acquired signIn Lock
+02:22:34:723 [trace] DataStore.java:102 pool-2-thread-6: Relinquished signIn Lock
+02:22:34:723 [trace] SteamReqProc.java:78 pool-2-thread-6: Login success
+02:22:34:724 [trace] SteamReqProc.java:214 pool-2-thread-6: Finished Working
+
+02:22:34:731 [trace] SteamLite.java:58 main: Received line: Content-Length: 19
+02:22:34:732 [trace] SteamLite.java:60 main: Buffer Size: 19
+02:22:34:733 [trace] SteamLite.java:64 main: LineText: {"login":"success"}
+02:22:34:734 [trace] SteamLite.java:91 main: fillLibrary Called
+02:22:34:736 [trace] SteamReqProc.java:46 pool-2-thread-7: Received line: Content-Length: 55
+02:22:34:736 [trace] SteamReqProc.java:49 pool-2-thread-7: Buffer Size: 55
+02:22:34:736 [trace] SteamReqProc.java:54 pool-2-thread-7: JsonText: {"username":"mjm","request":"library","password":"mjm"}
+02:22:34:737 [trace] DataStore.java:173 pool-2-thread-7: Acquired getUserGames Lock
+02:22:34:737 [trace] DataStore.java:177 pool-2-thread-7: Relinquished getUserGames Lock
+02:22:34:737 [trace] SteamReqProc.java:108 pool-2-thread-7: Request for user Library complete
+02:22:34:737 [trace] SteamReqProc.java:214 pool-2-thread-7: Finished Working
+
+02:22:34:737 [trace] SteamLite.java:58 main: Received line: Content-Length: 43
+02:22:34:738 [trace] SteamLite.java:60 main: Buffer Size: 43
+02:22:34:738 [trace] SteamLite.java:64 main: LineText: {"games":["Coin Flip"],"library":"success"}
+02:24:02:689 [trace] SteamReqProc.java:46 pool-2-thread-8: Received line: Content-Length: 53
+02:24:02:700 [trace] SteamReqProc.java:49 pool-2-thread-8: Buffer Size: 53
+02:24:02:700 [trace] SteamReqProc.java:54 pool-2-thread-8: JsonText: {"username":"mjm","request":"login","password":"mjm"}
+02:24:02:700 [trace] DataStore.java:97 pool-2-thread-8: Acquired signIn Lock
+02:24:02:701 [trace] DataStore.java:102 pool-2-thread-8: Relinquished signIn Lock
+02:24:02:701 [trace] SteamReqProc.java:78 pool-2-thread-8: Login success
+02:24:02:701 [trace] SteamReqProc.java:214 pool-2-thread-8: Finished Working
+
+02:24:02:708 [trace] SteamLite.java:58 main: Received line: Content-Length: 19
+02:24:02:710 [trace] SteamLite.java:60 main: Buffer Size: 19
+02:24:02:710 [trace] SteamLite.java:64 main: LineText: {"login":"success"}
+02:24:02:712 [trace] SteamLite.java:91 main: fillLibrary Called
+02:24:02:713 [trace] SteamReqProc.java:46 pool-2-thread-9: Received line: Content-Length: 55
+02:24:02:713 [trace] SteamReqProc.java:49 pool-2-thread-9: Buffer Size: 55
+02:24:02:713 [trace] SteamReqProc.java:54 pool-2-thread-9: JsonText: {"username":"mjm","request":"library","password":"mjm"}
+02:24:02:714 [trace] DataStore.java:173 pool-2-thread-9: Acquired getUserGames Lock
+02:24:02:714 [trace] DataStore.java:177 pool-2-thread-9: Relinquished getUserGames Lock
+02:24:02:714 [trace] SteamReqProc.java:108 pool-2-thread-9: Request for user Library complete
+02:24:02:714 [trace] SteamReqProc.java:214 pool-2-thread-9: Finished Working
+
+02:24:02:714 [trace] SteamLite.java:58 main: Received line: Content-Length: 43
+02:24:02:714 [trace] SteamLite.java:60 main: Buffer Size: 43
+02:24:02:715 [trace] SteamLite.java:64 main: LineText: {"games":["Coin Flip"],"library":"success"}
+02:26:31:932 [trace] SteamReqProc.java:46 pool-2-thread-10: Received line: Content-Length: 53
+02:26:31:933 [trace] SteamReqProc.java:49 pool-2-thread-10: Buffer Size: 53
+02:26:31:933 [trace] SteamReqProc.java:54 pool-2-thread-10: JsonText: {"username":"mjm","request":"login","password":"mjm"}
+02:26:31:933 [trace] DataStore.java:97 pool-2-thread-10: Acquired signIn Lock
+02:26:31:933 [trace] DataStore.java:102 pool-2-thread-10: Relinquished signIn Lock
+02:26:31:933 [trace] SteamReqProc.java:78 pool-2-thread-10: Login success
+02:26:31:934 [trace] SteamReqProc.java:214 pool-2-thread-10: Finished Working
+
+02:26:31:941 [trace] SteamLite.java:58 main: Received line: Content-Length: 19
+02:26:31:943 [trace] SteamLite.java:60 main: Buffer Size: 19
+02:26:31:943 [trace] SteamLite.java:64 main: LineText: {"login":"success"}
+02:26:31:944 [trace] SteamLite.java:91 main: fillLibrary Called
+02:26:31:946 [trace] SteamReqProc.java:46 pool-2-thread-1: Received line: Content-Length: 55
+02:26:31:946 [trace] SteamReqProc.java:49 pool-2-thread-1: Buffer Size: 55
+02:26:31:946 [trace] SteamReqProc.java:54 pool-2-thread-1: JsonText: {"username":"mjm","request":"library","password":"mjm"}
+02:26:31:946 [trace] DataStore.java:173 pool-2-thread-1: Acquired getUserGames Lock
+02:26:31:947 [trace] DataStore.java:177 pool-2-thread-1: Relinquished getUserGames Lock
+02:26:31:947 [trace] SteamReqProc.java:108 pool-2-thread-1: Request for user Library complete
+02:26:31:947 [trace] SteamReqProc.java:214 pool-2-thread-1: Finished Working
+
+02:26:31:947 [trace] SteamLite.java:58 main: Received line: Content-Length: 43
+02:26:31:948 [trace] SteamLite.java:60 main: Buffer Size: 43
+02:26:31:948 [trace] SteamLite.java:64 main: LineText: {"games":["Coin Flip"],"library":"success"}
+02:29:36:020 [trace] SteamReqProc.java:46 pool-2-thread-2: Received line: Content-Length: 53
+02:29:36:040 [trace] SteamReqProc.java:49 pool-2-thread-2: Buffer Size: 53
+02:29:36:040 [trace] SteamReqProc.java:54 pool-2-thread-2: JsonText: {"username":"mjm","request":"login","password":"mjm"}
+02:29:36:041 [trace] DataStore.java:97 pool-2-thread-2: Acquired signIn Lock
+02:29:36:041 [trace] DataStore.java:102 pool-2-thread-2: Relinquished signIn Lock
+02:29:36:041 [trace] SteamReqProc.java:78 pool-2-thread-2: Login success
+02:29:36:041 [trace] SteamReqProc.java:214 pool-2-thread-2: Finished Working
+
+02:29:36:049 [trace] SteamLite.java:58 main: Received line: Content-Length: 19
+02:29:36:051 [trace] SteamLite.java:60 main: Buffer Size: 19
+02:29:36:051 [trace] SteamLite.java:64 main: LineText: {"login":"success"}
+02:29:36:052 [trace] SteamLite.java:91 main: fillLibrary Called
+02:29:36:054 [trace] SteamReqProc.java:46 pool-2-thread-3: Received line: Content-Length: 55
+02:29:36:054 [trace] SteamReqProc.java:49 pool-2-thread-3: Buffer Size: 55
+02:29:36:054 [trace] SteamReqProc.java:54 pool-2-thread-3: JsonText: {"username":"mjm","request":"library","password":"mjm"}
+02:29:36:055 [trace] DataStore.java:173 pool-2-thread-3: Acquired getUserGames Lock
+02:29:36:055 [trace] DataStore.java:177 pool-2-thread-3: Relinquished getUserGames Lock
+02:29:36:055 [trace] SteamReqProc.java:108 pool-2-thread-3: Request for user Library complete
+02:29:36:055 [trace] SteamReqProc.java:214 pool-2-thread-3: Finished Working
+
+02:29:36:055 [trace] SteamLite.java:58 main: Received line: Content-Length: 43
+02:29:36:056 [trace] SteamLite.java:60 main: Buffer Size: 43
+02:29:36:056 [trace] SteamLite.java:64 main: LineText: {"games":["Coin Flip"],"library":"success"}
+02:33:49:429 [trace] SteamReqProc.java:46 pool-2-thread-4: Received line: Content-Length: 53
+02:33:49:429 [trace] SteamReqProc.java:49 pool-2-thread-4: Buffer Size: 53
+02:33:49:429 [trace] SteamReqProc.java:54 pool-2-thread-4: JsonText: {"username":"mjm","request":"login","password":"mjm"}
+02:33:49:430 [trace] DataStore.java:97 pool-2-thread-4: Acquired signIn Lock
+02:33:49:430 [trace] DataStore.java:102 pool-2-thread-4: Relinquished signIn Lock
+02:33:49:430 [trace] SteamReqProc.java:78 pool-2-thread-4: Login success
+02:33:49:430 [trace] SteamReqProc.java:214 pool-2-thread-4: Finished Working
+
+02:33:49:437 [trace] SteamLite.java:58 main: Received line: Content-Length: 19
+02:33:49:439 [trace] SteamLite.java:60 main: Buffer Size: 19
+02:33:49:440 [trace] SteamLite.java:64 main: LineText: {"login":"success"}
+02:33:49:442 [trace] SteamLite.java:91 main: fillLibrary Called
+02:33:49:443 [trace] SteamReqProc.java:46 pool-2-thread-5: Received line: Content-Length: 55
+02:33:49:444 [trace] SteamReqProc.java:49 pool-2-thread-5: Buffer Size: 55
+02:33:49:444 [trace] SteamReqProc.java:54 pool-2-thread-5: JsonText: {"username":"mjm","request":"library","password":"mjm"}
+02:33:49:444 [trace] DataStore.java:173 pool-2-thread-5: Acquired getUserGames Lock
+02:33:49:444 [trace] DataStore.java:177 pool-2-thread-5: Relinquished getUserGames Lock
+02:33:49:444 [trace] SteamReqProc.java:108 pool-2-thread-5: Request for user Library complete
+02:33:49:445 [trace] SteamReqProc.java:214 pool-2-thread-5: Finished Working
+
+02:33:49:445 [trace] SteamLite.java:58 main: Received line: Content-Length: 43
+02:33:49:445 [trace] SteamLite.java:60 main: Buffer Size: 43
+02:33:49:445 [trace] SteamLite.java:64 main: LineText: {"games":["Coin Flip"],"library":"success"}
+02:35:10:016 [trace] SteamReqProc.java:46 pool-2-thread-6: Received line: Content-Length: 53
+02:35:10:058 [trace] SteamReqProc.java:49 pool-2-thread-6: Buffer Size: 53
+02:35:10:059 [trace] SteamReqProc.java:54 pool-2-thread-6: JsonText: {"username":"mjm","request":"login","password":"mjm"}
+02:35:10:059 [trace] DataStore.java:97 pool-2-thread-6: Acquired signIn Lock
+02:35:10:059 [trace] DataStore.java:102 pool-2-thread-6: Relinquished signIn Lock
+02:35:10:059 [trace] SteamReqProc.java:78 pool-2-thread-6: Login success
+02:35:10:060 [trace] SteamReqProc.java:214 pool-2-thread-6: Finished Working
+
+02:35:10:070 [trace] SteamLite.java:58 main: Received line: Content-Length: 19
+02:35:10:074 [trace] SteamLite.java:60 main: Buffer Size: 19
+02:35:10:074 [trace] SteamLite.java:64 main: LineText: {"login":"success"}
+02:35:10:077 [trace] SteamLite.java:91 main: fillLibrary Called
+02:35:10:081 [trace] SteamReqProc.java:46 pool-2-thread-7: Received line: Content-Length: 55
+02:35:10:082 [trace] SteamReqProc.java:49 pool-2-thread-7: Buffer Size: 55
+02:35:10:082 [trace] SteamReqProc.java:54 pool-2-thread-7: JsonText: {"username":"mjm","request":"library","password":"mjm"}
+02:35:10:082 [trace] DataStore.java:173 pool-2-thread-7: Acquired getUserGames Lock
+02:35:10:082 [trace] DataStore.java:177 pool-2-thread-7: Relinquished getUserGames Lock
+02:35:10:082 [trace] SteamReqProc.java:108 pool-2-thread-7: Request for user Library complete
+02:35:10:083 [trace] SteamReqProc.java:214 pool-2-thread-7: Finished Working
+
+02:35:10:083 [trace] SteamLite.java:58 main: Received line: Content-Length: 43
+02:35:10:083 [trace] SteamLite.java:60 main: Buffer Size: 43
+02:35:10:083 [trace] SteamLite.java:64 main: LineText: {"games":["Coin Flip"],"library":"success"}
+02:36:19:698 [trace] SteamReqProc.java:46 pool-2-thread-8: Received line: Content-Length: 54
+02:36:19:722 [trace] SteamReqProc.java:49 pool-2-thread-8: Buffer Size: 54
+02:36:19:722 [trace] SteamReqProc.java:54 pool-2-thread-8: JsonText: {"username":"mjm","request":"logout","password":"mjm"}
+02:36:19:723 [trace] DataStore.java:112 pool-2-thread-8: Acquired signIn Lock
+02:36:19:723 [trace] DataStore.java:117 pool-2-thread-8: Relinquished signOut Lock
+02:36:19:723 [trace] SteamReqProc.java:177 pool-2-thread-8: Signed out successfully
+02:36:19:723 [trace] SteamReqProc.java:214 pool-2-thread-8: Finished Working
+
+02:36:19:723 [trace] SteamLite.java:58 main: Received line: Content-Length: 20
+02:36:19:724 [trace] SteamLite.java:60 main: Buffer Size: 20
+02:36:19:724 [trace] SteamLite.java:64 main: LineText: {"logout":"success"}
+02:36:47:030 [trace] SteamReqProc.java:46 pool-2-thread-9: Received line: Content-Length: 53
+02:36:47:048 [trace] SteamReqProc.java:49 pool-2-thread-9: Buffer Size: 53
+02:36:47:048 [trace] SteamReqProc.java:54 pool-2-thread-9: JsonText: {"username":"mjm","request":"login","password":"mjm"}
+02:36:47:048 [trace] DataStore.java:97 pool-2-thread-9: Acquired signIn Lock
+02:36:47:048 [trace] DataStore.java:102 pool-2-thread-9: Relinquished signIn Lock
+02:36:47:049 [trace] SteamReqProc.java:78 pool-2-thread-9: Login success
+02:36:47:049 [trace] SteamReqProc.java:214 pool-2-thread-9: Finished Working
+
+02:36:47:057 [trace] SteamLite.java:58 main: Received line: Content-Length: 19
+02:36:47:059 [trace] SteamLite.java:60 main: Buffer Size: 19
+02:36:47:059 [trace] SteamLite.java:64 main: LineText: {"login":"success"}
+02:36:47:062 [trace] SteamLite.java:91 main: fillLibrary Called
+02:36:47:064 [trace] SteamReqProc.java:46 pool-2-thread-10: Received line: Content-Length: 55
+02:36:47:064 [trace] SteamReqProc.java:49 pool-2-thread-10: Buffer Size: 55
+02:36:47:064 [trace] SteamReqProc.java:54 pool-2-thread-10: JsonText: {"username":"mjm","request":"library","password":"mjm"}
+02:36:47:065 [trace] DataStore.java:173 pool-2-thread-10: Acquired getUserGames Lock
+02:36:47:065 [trace] DataStore.java:177 pool-2-thread-10: Relinquished getUserGames Lock
+02:36:47:065 [trace] SteamReqProc.java:108 pool-2-thread-10: Request for user Library complete
+02:36:47:065 [trace] SteamReqProc.java:214 pool-2-thread-10: Finished Working
+
+02:36:47:065 [trace] SteamLite.java:58 main: Received line: Content-Length: 43
+02:36:47:066 [trace] SteamLite.java:60 main: Buffer Size: 43
+02:36:47:066 [trace] SteamLite.java:64 main: LineText: {"games":["Coin Flip"],"library":"success"}
+02:36:49:005 [trace] SteamReqProc.java:46 pool-2-thread-1: Received line: Content-Length: 54
+02:36:49:005 [trace] SteamReqProc.java:49 pool-2-thread-1: Buffer Size: 54
+02:36:49:006 [trace] SteamReqProc.java:54 pool-2-thread-1: JsonText: {"username":"mjm","request":"logout","password":"mjm"}
+02:36:49:006 [trace] DataStore.java:112 pool-2-thread-1: Acquired signIn Lock
+02:36:49:006 [trace] DataStore.java:117 pool-2-thread-1: Relinquished signOut Lock
+02:36:49:006 [trace] SteamReqProc.java:177 pool-2-thread-1: Signed out successfully
+02:36:49:007 [trace] SteamReqProc.java:214 pool-2-thread-1: Finished Working
+
+02:36:49:007 [trace] SteamLite.java:58 main: Received line: Content-Length: 20
+02:36:49:007 [trace] SteamLite.java:60 main: Buffer Size: 20
+02:36:49:007 [trace] SteamLite.java:64 main: LineText: {"logout":"success"}

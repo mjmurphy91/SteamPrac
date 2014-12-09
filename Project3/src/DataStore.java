@@ -12,21 +12,24 @@ public class DataStore implements java.io.Serializable {
 
 	private ArrayList<String> servers;
 	private String self;
+	private String master;
 	private ReentrantReadWriteLock lock;
-	private HashMap<String, Integer> serverLoads;
 	private HashMap<String, UserData> userInfo;
 	private HashMap<String, String> gameFiles;
 
 	public DataStore(String self) {
 		this.self = self;
+		master = "";
 		lock = new ReentrantReadWriteLock();
 		userInfo = new HashMap<String, UserData>();
 		gameFiles = new HashMap<String, String>();
 		servers = new ArrayList<String>();
+		servers.add(self);
 	}
 
 	public DataStore() {
-		serverLoads = new HashMap<String, Integer>();
+		master = "";
+		servers = new ArrayList<String>();
 		lock = new ReentrantReadWriteLock();
 	}
 	
@@ -47,6 +50,25 @@ public class DataStore implements java.io.Serializable {
 		lock.readLock().unlock();
 		rootLogger.trace("Relinquished getSelf Lock");
 		return selfCopy;
+	}
+	
+	public boolean setMaster(String newMaster) {
+		lock.writeLock().lock();
+		rootLogger.trace("Acquired setMaster Lock");
+		master = newMaster;
+		lock.writeLock().unlock();
+		rootLogger.trace("Relinquished setMaster Lock");
+		return true;
+	}
+	
+	public String getMaster() {
+		String masterCopy;
+		lock.readLock().lock();
+		rootLogger.trace("Acquired getMaster Lock");
+		masterCopy = master;
+		lock.readLock().unlock();
+		rootLogger.trace("Relinquished getMaster Lock");
+		return masterCopy;
 	}
 	
 	public boolean addUserInfo(String username, String password, String location) {
@@ -216,11 +238,14 @@ public class DataStore implements java.io.Serializable {
 	}
 
 	/**
-	 * SteamServer refreshing list of servers
+	 * SteamServer adding to list of servers
 	 */
 	public void addServer(String newServer) {
 		lock.writeLock().lock();
 		rootLogger.trace("Acquired addServer Lock");
+		if(master == "") {
+			master = newServer;
+		}
 		if (!servers.contains(newServer)) {
 			servers.add(newServer);
 		}
@@ -238,8 +263,18 @@ public class DataStore implements java.io.Serializable {
 		lock.writeLock().unlock();
 		rootLogger.trace("Relinquished removeServer Lock");
 	}
-
 	
+	public ArrayList<String> getServersList() {
+		ArrayList<String> serversCopy = new ArrayList<String>();
+		lock.readLock().lock();
+		rootLogger.trace("Acquired getServersList Lock");
+		for(String server : servers) {
+			serversCopy.add(server);
+		}
+		lock.readLock().unlock();
+		rootLogger.trace("Relinquished getServersList Lock");
+		return serversCopy;
+	}
 	
 	/**
 	 * Sets DataStore's entire content to given snapshot

@@ -3,11 +3,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 
 public class DiscReqProc implements Runnable {
@@ -16,102 +19,82 @@ public class DiscReqProc implements Runnable {
 
 	private Socket sock;
 	private DataStore ds;
+	private JSONParser parser;
 	
 	public DiscReqProc(Socket sock, DataStore ds) {
 		this.sock = sock;
 		this.ds = ds;
+		parser = new JSONParser();
 	}
-	
-	/**
-	 * Method for handling Discovery GET requests
-	 */
-	@SuppressWarnings("unchecked")
-	private void sendDataServerRequest(String minServer) throws IOException {
-		JSONObject obj = new JSONObject();
-		obj.put("min", minServer);
-		String responsebody = obj.toJSONString();
-		String responseheaders = "HTTP/1.1 200 OK\n" + "Content-Length: "
-				+ responsebody.getBytes().length + "\n\n";
-		rootLogger.trace("Sending Request to FE: "
-				+ responseheaders.trim() + " with body: "
-				+ responsebody);
-		OutputStream out = sock.getOutputStream();
-		out.write(responseheaders.getBytes());
-		out.write(responsebody.getBytes());
-		out.flush();
-		out.close();
-	}
-	
 
-	/**
-	 * Method for handling Discovery POST requests
-	 */
-	@SuppressWarnings("unchecked")
-	private void sendDiscRequest(String newServer, ArrayList<String> servers) {
-		JSONObject obj = new JSONObject();
-		String responsebody = "";
-		String requestheaders = "";
-		boolean minSent = false;
-		
-		String responseheaders = "HTTP/1.1 200 OK\n";
+	public void sendJSON(JSONObject obj) {
 		try {
-			returnHeaderOnly(responseheaders);
+			String requestbody = obj.toJSONString();
+			String requestheaders = "Content-Length: "
+					+ requestbody.getBytes().length + "\n";
+			OutputStream out = sock.getOutputStream();
+			out.write(requestheaders.getBytes());
+			out.write(requestbody.getBytes());
+						
+			out.flush();
+			out.close();
+
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
 		} catch (IOException e) {
-			rootLogger.trace("returnHeadersOnly failed");
-		}
-		
-		for (String server : servers) {
-			obj.put("new", newServer);
-			if (!minSent) {
-				obj.put("min", true);
-			} else {
-				obj.put("min", false);
-			}
-			
-			responsebody = obj.toJSONString();
-			requestheaders = "POST /tweets?d=disc HTTP/"
-					+ reqLine.getVersion() + "\nContent-Length: "
-					+ responsebody.getBytes().length + "\n\n";
-			
-			String[] serverParts = server.split(":");
-			Socket dataSock = null;
-			try {
-				dataSock = new Socket(serverParts[0],
-						Integer.parseInt(serverParts[1]));
-				OutputStream out = dataSock.getOutputStream();
-				rootLogger.trace("Sending Request to DataStore: "
-						+ requestheaders.trim() + " with body: "
-						+ responsebody);
-
-				out.write(requestheaders.getBytes());
-				out.write(responsebody.getBytes());
-			
-				String lineText = "";
-
-				BufferedReader in = new BufferedReader(
-						new InputStreamReader(dataSock.getInputStream()));
-
-				lineText = in.readLine().trim();
-				rootLogger
-						.trace("Received from DataStore: " + lineText);
-				if (lineText.equalsIgnoreCase("HTTP/1.1 200 OK\n")) {
-					if(!minSent) {
-						minSent = true;
-					}
-				}
-
-				out.flush();
-				out.close();
-				in.close();
-				dataSock.close();
-
-			} catch (IOException e) {
-				rootLogger.trace("Bad Server: " + server);
-				ds.removeServer(server);
-			}
+			e.printStackTrace();
 		}
 	}
 	
+	public JSONObject serverRequest(JSONObject request, String server) {
+		String lineText = "";
+		Socket steamSock;
+		String[] steamServer = server.split(":");
+		
+		try {
+			steamSock = new Socket(steamServer[0], Integer.parseInt(steamServer[1]));
+
+			String requestbody = request.toJSONString();
+			String requestheaders = "Content-Length: "
+					+ requestbody.getBytes().length + "\n";
+			OutputStream out = steamSock.getOutputStream();
+			out.write(requestheaders.getBytes());
+			out.write(requestbody.getBytes());
+
+			String line;
+			BufferedReader in = new BufferedReader(new InputStreamReader(
+					steamSock.getInputStream()));
+
+			line = in.readLine();
+			rootLogger.trace("Received line: " + line);
+			int bufferSize = Integer.parseInt(line.split(" ")[1]);
+			rootLogger.trace("Buffer Size: " + bufferSize);
+			char[] bytes = new char[bufferSize];
+			in.read(bytes, 0, bufferSize);
+			lineText = new String(bytes);
+			rootLogger.trace("LineText: " + lineText);
+						
+			out.flush();
+			out.close();
+			in.close();
+			steamSock.close();
+
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		try {
+			return (JSONObject) parser.parse(lineText);
+		} catch (ParseException e) {
+			e.printStackTrace();
+			rootLogger.trace("ParseException: " + e);
+			return null;
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void run() {
 		BufferedReader in = null;
@@ -119,30 +102,108 @@ public class DiscReqProc implements Runnable {
 		try {
 			in = new BufferedReader(
 					new InputStreamReader(sock.getInputStream()));
-
+			
+			String jsonText = "";
+			
 			line = in.readLine().trim();
 			rootLogger.trace("Received line: " + line);
 			
-		
+			int bufferSize = Integer.parseInt(line.split(" ")[1]);
+			rootLogger.trace("Buffer Size: " + bufferSize);
+			char[] bytes = new char[bufferSize];
+			in.read(bytes, 0, bufferSize);
+			jsonText = new String(bytes);
 			
-		} catch (IOException e) {
-			String responseheaders = "HTTP/1.1 500 Internal Server Error\n";
-			rootLogger.trace("IOException occurred");
+			rootLogger.trace("JsonText: " + jsonText);
+			
+			JSONObject obj = null;
+			
 			try {
-				returnHeaderOnly(responseheaders);
-			} catch (IOException e1) {
-				rootLogger.trace("returnHeadersOnly failed");
+				obj = (JSONObject) parser.parse(jsonText);
+				if(obj.containsKey("request")) {
+					//Get Master
+					if(obj.get("request").equals("getmaster")) {
+						if(obj.containsKey("master") 
+								&& obj.get("master") != null) {
+							obj.clear();
+							obj.put("request", "alive");
+							obj = serverRequest(obj, ds.getMaster());
+							
+							JSONObject excObj = new JSONObject();
+							if(obj == null) {
+								ds.removeServer("master");
+								obj = new JSONObject();
+								obj.put("request", "elect");
+								ArrayList<String> servers = ds.getServersList();
+								for(String server: servers) {
+									obj = serverRequest(excObj, server);
+									if(obj != null && obj.containsKey("master")) {
+										ds.setMaster((String) obj.get("master"));
+										break;
+									}
+								}
+							}
+						}
+						
+						String[] masterServer = ds.getMaster().split(":");
+						obj.clear();
+						obj.put("getmaster", "success");
+						obj.put("ip", masterServer[0]);
+						obj.put("port", masterServer[1]);
+						rootLogger.trace("Getmaster: " + masterServer[0] + ":"
+								+ masterServer[1]);
+						sendJSON(obj);
+					}
+					//Announce
+					else if(obj.get("request").equals("announce") 
+							&& obj.containsKey("self")) {
+						String self = (String) obj.get("self");
+						ArrayList<String> servers = ds.getServersList();
+						ds.addServer(self);
+						
+						obj = new JSONObject();
+						obj.put("announce", "success");
+						String master = ds.getMaster();
+						obj.put("master", master);
+						sendJSON(obj);
+						
+						obj = new JSONObject();
+						obj.put("request", "announce");
+						obj.put("newserver", self);
+						for(String server : servers) {
+							serverRequest(obj, server);
+						}
+					}
+					//Update Master
+					else if(obj.get("request").equals("master") 
+							&& obj.containsKey("master")) {
+						ds.setMaster((String) obj.get("master"));
+						
+						obj = new JSONObject();
+						obj.put("master", "success");
+						sendJSON(obj);
+					}	
+				}
+			} catch (ParseException e) {
+				rootLogger.trace("position: " + e.getPosition());
+				rootLogger.trace(e);
 			}
-		}
 
+		} catch (IOException e) {
+			JSONObject excObj = new JSONObject();
+			excObj.put("e", "Exception occurred");
+			rootLogger.trace("IOException occurred");
+			sendJSON(excObj);
+		}
+		
 		try {
 			in.close();
 			sock.close();
 		} catch (IOException e) {
 			rootLogger.trace("Problem closing socket");
 		}
-
-		rootLogger.trace("Finished Working\n");
+		
+		rootLogger.trace("Finished Working\n");	
+		
 	}
-
 }
