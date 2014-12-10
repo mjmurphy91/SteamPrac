@@ -195,6 +195,69 @@ public class SteamReqProc implements Runnable {
 							sendJSON(excObj);
 						}
 					}
+					//Update Multiplayer Game
+					else if (obj.get("request").equals("upmulti")
+							&& obj.containsKey("opponent")
+							&& obj.containsKey("baord")) {
+						ds.updateMulti((String) obj.get("username"), 
+								(String) obj.get("opponent"), 
+								(String) obj.get("baord"));
+						if(ds.getSelf().equals(ds.getMaster())) {
+							ArrayList<String> servers = ds.getServersList();
+							Collections.sort(servers);
+							for(String server: servers) {
+								if(server != ds.getSelf()) {
+									serverRequest(obj, server.split(":"));
+								}
+							}
+						}
+						JSONObject excObj = new JSONObject();
+						excObj.put("upmulti", "success");
+						rootLogger.trace("Game successfuly purchased");
+						sendJSON(excObj);
+						
+					}
+					//Get Multiplayer Game Update
+					else if (obj.get("request").equals("multiup")
+							&& obj.containsKey("opponent")) {
+						JSONObject excObj = ds.multiUpdate(
+								(String) obj.get("username"), 
+								(String) obj.get("opponent"));
+						if(ds.getSelf().equals(ds.getMaster())) {
+							ArrayList<String> servers = ds.getServersList();
+							Collections.sort(servers);
+							for(String server: servers) {
+								if(server != ds.getSelf()) {
+									serverRequest(obj, server.split(":"));
+								}
+							}
+						}
+						excObj.put("multiup", "success");
+						rootLogger.trace("Game successfuly purchased");
+						sendJSON(excObj);
+					}
+					//FindOpponent
+					else if (obj.get("request").equals("findOpponent")
+							&& obj.containsKey("player")) {
+						JSONObject excObj = new JSONObject();
+						excObj.put("opponent", ds.multiPlayerCheck(
+								(String) obj.get("username")));
+						if(ds.getSelf().equals(ds.getMaster())) {
+							ArrayList<String> servers = ds.getServersList();
+							Collections.sort(servers);
+							for(String server: servers) {
+								if(server != ds.getSelf()) {
+									serverRequest(obj, server.split(":"));
+								}
+							}
+						}
+						
+						excObj.put("findOpponent", "success");
+						rootLogger.trace("Opponent found: " 
+								+ excObj.get("opponent"));
+						sendJSON(excObj);
+						
+					}
 					//Logout
 					else if (obj.get("request").equals("logout")) {
 						boolean signedOut = ds.signOut(
@@ -287,7 +350,7 @@ public class SteamReqProc implements Runnable {
 						obj = ds.getSnapshot();
 						obj.put("request", "snapshot");
 						for(String server: servers) {
-							if(server != ds.getSelf()) {
+							if(!server.equals(ds.getSelf())) {
 								if(serverRequest(obj, server.split(":")) == null) {
 									ds.removeServer(server);
 								}
@@ -443,12 +506,7 @@ public class SteamReqProc implements Runnable {
 		obj.put("master", master);
 		
 		for(String server: servers) {
-			if(server != ds.getSelf()) {
-				serverRequest(obj, server.split(":"));
-			}
-		}
-		
-		ds.setMaster(master);
+			serverRequest(obj, server.split(":"));
+		}		
 	}
-
 }

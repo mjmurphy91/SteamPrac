@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -132,16 +133,20 @@ public class DiscReqProc implements Runnable {
 							obj = serverRequest(obj, ds.getMaster());
 							
 							if(obj == null) {
-								ds.removeServer("master");
+								ds.removeServer(ds.getMaster());
 								obj = new JSONObject();
 								obj.put("request", "elect");
 								ArrayList<String> servers = ds.getServersList();
+								Collections.sort(servers);
 								JSONObject obj2;
 								for(String server: servers) {
 									obj2 = serverRequest(obj, server);
 									if(obj2 != null && obj2.containsKey("master")) {
 										ds.setMaster((String) obj2.get("master"));
 										break;
+									}
+									else {
+										ds.removeServer(server);
 									}
 								}
 							}
@@ -161,12 +166,31 @@ public class DiscReqProc implements Runnable {
 							&& obj.containsKey("self")) {
 						String self = (String) obj.get("self");
 						ds.addServer(self);
+						if(ds.getMaster().equals("")) {
+							ds.setMaster(self);
+						}
 						
 						if(!self.equals(ds.getMaster())) {
 							obj.clear();
 							obj.put("request", "announce");
 							obj.put("newserver", self);
-							serverRequest(obj, ds.getMaster());
+							while(serverRequest(obj, ds.getMaster()) == null) {
+								ds.removeServer(ds.getMaster());
+								JSONObject obj2 = new JSONObject();
+								obj2.put("request", "elect");
+								ArrayList<String> servers = ds.getServersList();
+								Collections.sort(servers);
+								JSONObject obj3;
+								for(String server: servers) {
+									if(!server.equals(self)) {
+										obj3 = serverRequest(obj2, server);
+										if(obj3 != null && obj3.containsKey("master")) {
+											ds.setMaster((String) obj3.get("master"));
+											break;
+										}
+									}
+								}
+							}
 						}
 						
 						obj.clear();

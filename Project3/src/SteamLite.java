@@ -197,21 +197,33 @@ public class SteamLite {
 	 * Play the chosen game.
 	 */
 	//TODO: Multiplayer
+	@SuppressWarnings("unchecked")
 	private static void playGame(int choice) {
 		if(!gamesLibrary.containsKey(myLibrary.get(choice).replaceAll(" ", ""))) {
 			System.out.println("Game is now downloading");
 			downloadGame(myLibrary.get(choice));
 			System.out.println("Game download complete");
 		}
+		JSONObject obj;
 		Game game = gamesLibrary.get(myLibrary.get(choice).replaceAll(" ", ""));
 		String input;
+		if(game.isMultiplayer()) {
+			System.out.println("Finding opponent to play against");
+			obj = new JSONObject();
+			obj.put("request", "findOpponent");
+			obj.put("game", game.getTitle());
+			JSONObject obj2;
+			while(((obj2 = serverRequest(obj)) == null) || !obj2.containsKey("player"));
+			if(game.getTitle().equals("Tick Tack Toe")) {
+				if(obj2.get("player").equals("2")) {
+					game.setPlayer("O");
+				}
+			}
+		}
 		printGameCommands();
 		
 		while(!game.isVictory()) {
 			System.out.println("Print Commands Again: (p)");
-			if(game.isMultiplayer()) {
-				//get update
-			}
 			
 			input = scan.next();
 			
@@ -247,6 +259,10 @@ public class SteamLite {
 			}
 			else {
 				System.out.println(input + " is not a legal argument.");
+			}
+			
+			if(game.isMultiplayer()) {
+				//get update
 			}
 		}
 		System.out.println("Returning to main menu.");
@@ -413,6 +429,11 @@ public class SteamLite {
 			}
 		}
 		obj = serverRequest(obj);
+		if(obj == null) {
+			getInitialServer();
+			return false;
+		}
+		
 		if(!obj.containsKey("buy") 
 				|| (!obj.get("buy").equals("success") 
 						&& !obj.get("buy").equals("failed"))) {

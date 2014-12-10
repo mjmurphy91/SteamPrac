@@ -17,6 +17,7 @@ public class DataStore implements java.io.Serializable {
 	private ReentrantReadWriteLock lock;
 	private HashMap<String, UserData> userInfo;
 	private HashMap<String, String> gameFiles;
+	private ArrayList<String> waitingPlayers;
 
 	public DataStore(String self) {
 		this.self = self;
@@ -26,6 +27,7 @@ public class DataStore implements java.io.Serializable {
 		gameFiles = new HashMap<String, String>();
 		servers = new ArrayList<String>();
 		servers.add(self);
+		waitingPlayers = new ArrayList<String>();
 	}
 
 	public DataStore() {
@@ -278,6 +280,55 @@ public class DataStore implements java.io.Serializable {
 		return serversCopy;
 	}
 	
+	public String multiPlayerCheck(String player) {
+		String opponent = "";
+		lock.writeLock().lock();
+		rootLogger.trace("Acquired multiPlayerCheck Lock");
+		if(!waitingPlayers.contains(player)) {
+			UserData ud = userInfo.get(player);
+			opponent = ud.hasOpponent();
+			if(!opponent.equals("")) {
+				lock.writeLock().unlock();
+				rootLogger.trace("Relinquished multiPlayerCheck Lock");
+				return opponent;
+			}
+			waitingPlayers.add(player);
+		}
+		for(String p: waitingPlayers) {
+			if(!p.equals(player)) {
+				opponent = p;
+				waitingPlayers.remove(p);
+				waitingPlayers.remove(player);
+				userInfo.get(player).startGame(opponent, "Tick Tack Toe", "1");
+				userInfo.get(opponent).startGame(player, "Tick Tack Toe", "2");
+				break;
+			}
+		}	
+		lock.writeLock().unlock();
+		rootLogger.trace("Relinquished multiPlayerCheck Lock");
+		return opponent;
+	}
+	
+	public boolean updateMulti(String player, String opponent, String board) {
+		lock.writeLock().lock();
+		rootLogger.trace("Acquired setSnapshot Lock");
+		UserData ui = userInfo.get(player);
+		ui.makeUpdate(opponent, board);
+		lock.writeLock().unlock();
+		rootLogger.trace("Relinquished setSnapshot Lock");
+		return true;
+	}
+	
+	public JSONObject multiUpdate(String player, String opponent) {
+		lock.writeLock().lock();
+		rootLogger.trace("Acquired setSnapshot Lock");
+		UserData ui = userInfo.get(player);
+		JSONObject obj = ui.getUpdate(opponent);
+		lock.writeLock().unlock();
+		rootLogger.trace("Relinquished setSnapshot Lock");
+		return obj;
+	}
+	
 	/**
 	 * Sets DataStore's entire content to given snapshot
 	 */
@@ -291,16 +342,18 @@ public class DataStore implements java.io.Serializable {
 		
 		// Set ServerList
 		JSONArray newServers = (JSONArray) snapshot.get("servers");
-		servers = new ArrayList<String>();
+		servers.clear();
 		servers.add(self);
 		for (Object obServer : newServers) {
 			String server = (String) obServer;
-			servers.add(server);
+			if(!servers.contains(server)) {
+				servers.add(server);
+			}
 		}
 
 		// Set GameFiles
 		JSONObject newGameFiles = (JSONObject) snapshot.get("gameFiles");
-		gameFiles = new HashMap<String, String>();
+		gameFiles.clear();
 		for (Object game : newGameFiles.keySet()) {
 			gameFiles.put((String) game, (String) newGameFiles.get(game));
 		}
@@ -343,7 +396,9 @@ public class DataStore implements java.io.Serializable {
 		// Get ServerList
 		JSONArray serverListcpy = new JSONArray();
 		for (String original : servers) {
-			serverListcpy.add(original);
+			if(!serverListcpy.contains(original)) {
+				serverListcpy.add(original);
+			}
 		}
 		obj.put("servers", serverListcpy);
 
