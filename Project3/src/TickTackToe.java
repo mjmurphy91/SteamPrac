@@ -136,22 +136,39 @@ public class TickTackToe implements Game{
 	@Override
 	public boolean updateBoard(String currentPlayerTurn, String newBoard) {
 		String[] newBoardPieces = newBoard.split(",");
+		int Xcount = 0;
+		int Ocount = 0;
 		
-		if (newBoardPieces.length != 9) {
+		if (newBoardPieces.length < 9) {
 			return false;
 		}
 		
 		for (int i = 0; i < 9; i++) {
 			board.set(i, newBoardPieces[i]);
+			if(newBoardPieces[i].equals("O")) {
+				Ocount++;
+			}
+			else if(newBoardPieces[i].equals("X")) {
+				Xcount++;
+			}
 		}
-		if (newBoardPieces[9].equals("true")) {
-			isXTurn = true;
+		if (Xcount > Ocount) {
+			isXTurn = false;
 		}
 		else {
-			isXTurn = false;
+			isXTurn = true;
 		}
 		
 		return true;
+	}
+	
+	@Override
+	public String getBoard() {
+		String boardCpy = "";
+		for(String piece: board) {
+			boardCpy += piece + ",";
+		}
+		return boardCpy;
 	}
 
 	@Override
@@ -189,5 +206,4 @@ public class TickTackToe implements Game{
 	public boolean isMultiplayer() {
 		return true;
 	}
-
 }

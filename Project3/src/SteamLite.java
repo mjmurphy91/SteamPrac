@@ -72,6 +72,8 @@ public class SteamLite {
 			//e.printStackTrace();
 		} catch (IOException e) {
 			//e.printStackTrace();
+		} catch(NullPointerException e) {
+			//e.printStackTrace();
 		}
 		
 		try {
@@ -124,9 +126,6 @@ public class SteamLite {
 				for(File file: files) {
 					String fileCheck = file.getName().replace(".java", "");
 					if(game.replaceAll(" ", "").equals(fileCheck)) {
-//						Class<?> clazz = Class.forName(fileCheck);
-//						Constructor<?> constructor = clazz.getConstructor(String.class, Integer.class);
-//						Object instance = constructor.newInstance("stringparam", 42);
 						if(fileCheck.equals("TickTackToe")) {
 							gamesLibrary.put(fileCheck, new TickTackToe());
 						}
@@ -196,7 +195,6 @@ public class SteamLite {
 	/**
 	 * Play the chosen game.
 	 */
-	//TODO: Multiplayer
 	@SuppressWarnings("unchecked")
 	private static void playGame(int choice) {
 		if(!gamesLibrary.containsKey(myLibrary.get(choice).replaceAll(" ", ""))) {
@@ -204,21 +202,44 @@ public class SteamLite {
 			downloadGame(myLibrary.get(choice));
 			System.out.println("Game download complete");
 		}
-		JSONObject obj;
+		JSONObject obj = new JSONObject();
+		JSONObject obj2;
+		String opponent = "";
 		Game game = gamesLibrary.get(myLibrary.get(choice).replaceAll(" ", ""));
 		String input;
 		if(game.isMultiplayer()) {
+			//find opponent
 			System.out.println("Finding opponent to play against");
-			obj = new JSONObject();
 			obj.put("request", "findOpponent");
-			obj.put("game", game.getTitle());
-			JSONObject obj2;
-			while(((obj2 = serverRequest(obj)) == null) || !obj2.containsKey("player"));
-			if(game.getTitle().equals("Tick Tack Toe")) {
-				if(obj2.get("player").equals("2")) {
-					game.setPlayer("O");
+			obj.put("username", username);
+			obj.put("password", password);
+			while(((obj2 = serverRequest(obj)) == null) 
+					|| !obj2.containsKey("opponent")) {
+				if(obj2==null) {
+					getInitialServer();
 				}
+				
+				try {
+				    Thread.sleep(5000);
+				} catch(InterruptedException ex) {
+				    Thread.currentThread().interrupt();
+				}
+				
 			}
+			opponent = (String) obj2.get("opponent");
+			//get update
+			obj.clear();
+			obj.put("request", "multiup");
+			obj.put("username", username);
+			obj.put("password", password);
+			obj.put("opponent", opponent);
+			while(((obj2 = serverRequest(obj)) == null)) {
+				getInitialServer();
+			}
+			game.setPlayer((String) obj2.get("player")); 
+			game.updateBoard((String) obj2.get("turn"), 
+					(String) obj2.get("board"));
+			System.out.println("Opponent found: " + opponent);
 		}
 		printGameCommands();
 		
@@ -238,6 +259,16 @@ public class SteamLite {
 					else {
 						if(game.isMultiplayer()) {
 							//send update
+							obj.clear();
+							obj.put("request", "upmulti");
+							obj.put("username", username);
+							obj.put("password", password);
+							obj.put("opponent", opponent);
+							obj.put("board", game.getBoard());
+							while(((obj2 = serverRequest(obj)) == null)) {
+								getInitialServer();
+							}
+							System.out.println("Just sent update");
 						}
 						if(!game.isVictory()) {
 							System.out.println("Victory has not yet been attained");
@@ -263,8 +294,20 @@ public class SteamLite {
 			
 			if(game.isMultiplayer()) {
 				//get update
+				obj.clear();
+				obj.put("request", "multiup");
+				obj.put("username", username);
+				obj.put("password", password);
+				obj.put("opponent", opponent);
+				while(((obj2 = serverRequest(obj)) == null)) {
+					getInitialServer();
+				}
+				game.setPlayer((String) obj2.get("player")); 
+				game.updateBoard((String) obj2.get("turn"), 
+						(String) obj2.get("board"));
 			}
 		}
+		System.out.println(game.drawBoard());
 		System.out.println("Returning to main menu.");
 	}
 	

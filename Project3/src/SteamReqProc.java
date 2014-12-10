@@ -198,10 +198,13 @@ public class SteamReqProc implements Runnable {
 					//Update Multiplayer Game
 					else if (obj.get("request").equals("upmulti")
 							&& obj.containsKey("opponent")
-							&& obj.containsKey("baord")) {
+							&& obj.containsKey("board")) {
 						ds.updateMulti((String) obj.get("username"), 
 								(String) obj.get("opponent"), 
-								(String) obj.get("baord"));
+								(String) obj.get("board"));
+						ds.updateMulti((String) obj.get("opponent"), 
+								(String) obj.get("username"), 
+								(String) obj.get("board"));
 						if(ds.getSelf().equals(ds.getMaster())) {
 							ArrayList<String> servers = ds.getServersList();
 							Collections.sort(servers);
@@ -213,9 +216,8 @@ public class SteamReqProc implements Runnable {
 						}
 						JSONObject excObj = new JSONObject();
 						excObj.put("upmulti", "success");
-						rootLogger.trace("Game successfuly purchased");
+						rootLogger.trace("Game successfuly updated");
 						sendJSON(excObj);
-						
 					}
 					//Get Multiplayer Game Update
 					else if (obj.get("request").equals("multiup")
@@ -233,15 +235,19 @@ public class SteamReqProc implements Runnable {
 							}
 						}
 						excObj.put("multiup", "success");
-						rootLogger.trace("Game successfuly purchased");
+						rootLogger.trace("Get Multiplayer Update Finished");
+						rootLogger.trace("Board: " + excObj.get("board"));
 						sendJSON(excObj);
 					}
 					//FindOpponent
 					else if (obj.get("request").equals("findOpponent")
-							&& obj.containsKey("player")) {
+							&& obj.containsKey("username")) {
 						JSONObject excObj = new JSONObject();
-						excObj.put("opponent", ds.multiPlayerCheck(
-								(String) obj.get("username")));
+						String opponent = ds.multiPlayerCheck(
+								(String) obj.get("username"));
+						if(!opponent.equals("")) {
+							excObj.put("opponent", opponent);
+						}
 						if(ds.getSelf().equals(ds.getMaster())) {
 							ArrayList<String> servers = ds.getServersList();
 							Collections.sort(servers);

@@ -90,19 +90,13 @@ public class UserData implements Serializable{
 		return "";
 	}
 	
-	public boolean startGame(String opponent, String title, String player) {
-		if(title.equals("Tick Tack Toe")) {
-			Game g = new TickTackToe();
-			if(player.equals("2")) {
-				g.setPlayer("O");
-			}
-			gamesInProgress.put(opponent, g);
-			return true;
+	public boolean startGame(String opponent, String player) {
+		Game g = new TickTackToe();
+		if(player.equals("2")) {
+			g.setPlayer("O");
 		}
-		else {
-			System.out.println("Game: " + title + " is not implemented");
-			return false;
-		}
+		gamesInProgress.put(opponent, g);
+		return true;
 	}
 	
 	public boolean makeUpdate(String opponent, String board) {
@@ -122,7 +116,8 @@ public class UserData implements Serializable{
 	public JSONObject getUpdate(String opponent) {
 		Game g = gamesInProgress.get(opponent);
 		JSONObject obj = new JSONObject();
-		obj.put("board", g.drawBoard());
+		obj.put("board", g.getBoard());
+		obj.put("player", g.getPlayer());
 		if(g.isMyTurn()) {
 			if(g.getPlayer().equals("X")) {
 				obj.put("turn", "X");

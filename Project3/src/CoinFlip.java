@@ -92,4 +92,8 @@ public class CoinFlip implements Game{
 	public boolean isMultiplayer() {
 		return false;
 	}
+	@Override
+	public String getBoard() {
+		return drawBoard();
+	}
 }

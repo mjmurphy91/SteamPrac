@@ -299,8 +299,9 @@ public class DataStore implements java.io.Serializable {
 				opponent = p;
 				waitingPlayers.remove(p);
 				waitingPlayers.remove(player);
-				userInfo.get(player).startGame(opponent, "Tick Tack Toe", "1");
-				userInfo.get(opponent).startGame(player, "Tick Tack Toe", "2");
+				userInfo.get(player).startGame(opponent, "1");
+				userInfo.get(opponent).startGame(player, "2");
+				rootLogger.trace("Started Games for: " + player + " and " + opponent);
 				break;
 			}
 		}	
@@ -311,11 +312,11 @@ public class DataStore implements java.io.Serializable {
 	
 	public boolean updateMulti(String player, String opponent, String board) {
 		lock.writeLock().lock();
-		rootLogger.trace("Acquired setSnapshot Lock");
+		rootLogger.trace("Acquired updateMulti Lock");
 		UserData ui = userInfo.get(player);
 		ui.makeUpdate(opponent, board);
 		lock.writeLock().unlock();
-		rootLogger.trace("Relinquished setSnapshot Lock");
+		rootLogger.trace("Relinquished updateMulti Lock");
 		return true;
 	}
 	

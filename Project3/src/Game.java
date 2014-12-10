@@ -17,6 +17,11 @@ public interface Game {
 	boolean updateBoard(String currentPlayerTurn, String newBoard);
 	
 	/**
+	 * Gets a string copy of the board for update purposes
+	 */
+	String getBoard();
+	
+	/**
 	 * Returns the rules of the game being played
 	 */
 	String getRules();
